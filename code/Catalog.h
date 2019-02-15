@@ -24,11 +24,13 @@ private:
 		unsigned int disVal;
 		string attName;
 		string attType;
+		unsigned int numOrder;
 	};
 
 	struct tbld{
 
 		string name;
+		unsigned int tNum;
 		unsigned int tupN;
 		string fileL;
 		vector<atdata> attble;
@@ -38,6 +40,7 @@ private:
 
 	vector<tbld> tableData;
 	sqlite3 *db;	
+
 
 public:
 	/* Catalog constructor.
