@@ -24,7 +24,7 @@ Catalog::Catalog(string& _fileName) {
 	}else{
 
 		fprintf(stderr, "Opened db %s\n", _fileName.c_str());
-		sql = "SELECT t.name, t.noTuples, t.path, a.name, a.type, a.noDistinct, a.tblN FROM tableL t, attributeL a WHERE t.name == a.tblN";
+		sql = "SELECT t.name, t.noTuples, t.path, a.name , a.type, a.noDistinct, a.atO, t.tum FROM tableL t, attributeL a WHERE t.name == a.tblN ORDER BY t.tum, a.atO;";
 		rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0);
 
 		//cout << "Got to SELECT" << endl;
@@ -164,7 +164,7 @@ bool Catalog::Save() {
 
 	//cout << "DELETED TABLE TABLE" << endl;
 
-	sql = "CREATE TABLE attributeL (name STRING NOT NULL, type STRING NOT NULL, noDistinct INTEGER NOT NULL, tblN STRING NOT NULL)";
+	sql = "CREATE TABLE attributeL (name STRING NOT NULL, type STRING NOT NULL, noDistinct INTEGER NOT NULL, tblN STRING NOT NULL, atO INTEGER NOT NULL)";
 
 	rc = sqlite3_exec(db, sql.c_str(), 0, 0, &zErrMsg);
 
@@ -177,7 +177,7 @@ bool Catalog::Save() {
 
 	//cout << "REMADE ATTRIBUTE TABLE" << endl;
 
-	sql = "CREATE TABLE tableL (name STRING NOT NULL, noTuples INTEGER NOT NULL, path STRING NOT NULL);";
+	sql = "CREATE TABLE tableL (name STRING NOT NULL, noTuples INTEGER NOT NULL, path STRING NOT NULL, tum INTEGER NOT NULL);";
 
 	rc = sqlite3_exec(db, sql.c_str(), 0, 0, &zErrMsg);
 
@@ -190,7 +190,7 @@ bool Catalog::Save() {
 
 	//cout << "REMADE TABLE TABLE" << endl;
 
-	sql = "INSERT INTO attributeL VALUES(?1,?2,?3,?4);";
+	sql = "INSERT INTO attributeL VALUES(?1,?2,?3,?4,?5);";
 
 	rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0);
 
@@ -204,6 +204,7 @@ bool Catalog::Save() {
 			rc = sqlite3_bind_text(stmt, 2, tableData[i].attble[j].attType.c_str(), tableData[i].attble[j].attType.size(), SQLITE_STATIC);
 			rc = sqlite3_bind_int(stmt, 3, tableData[i].attble[j].disVal);
 			rc = sqlite3_bind_text(stmt, 4, tableData[i].name.c_str(), tableData[i].name.size(), SQLITE_STATIC);
+			rc = sqlite3_bind_int(stmt, 5, tableData[i].attble[j].numOrder);
 			rc = sqlite3_step(stmt);
 			
 			//fprintf(stdout, "INSERTING THE FOLLOWING INTO %s\n", tableData[i].name.c_str());
@@ -222,7 +223,7 @@ bool Catalog::Save() {
 	//cout << "DATAFIED ATTRIBUTE TABLE" << endl;
 
 
-	sql = "INSERT INTO tableL VALUES(?1, ?2, ?3);";
+	sql = "INSERT INTO tableL VALUES(?1, ?2, ?3, ?4);";
 	
 	rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0);
 
@@ -233,6 +234,7 @@ bool Catalog::Save() {
 		rc = sqlite3_bind_text(stmt, 1, tableData[i].name.c_str(), tableData[i].name.size(), SQLITE_STATIC);
 		rc = sqlite3_bind_int(stmt, 2, tableData[i].tupN);
 		rc = sqlite3_bind_text(stmt, 3, tableData[i].fileL.c_str(), tableData[i].fileL.size(), SQLITE_STATIC);
+		rc = sqlite3_bind_int(stmt, 4, tableData[i].tNum);
 		rc = sqlite3_step(stmt);
 		
 		//fprintf(stdout, "%s \t%u \t%s\n", tableData[i].name.c_str(), tableData[i].tupN, tableData[i].fileL.c_str());
@@ -452,6 +454,13 @@ bool Catalog::CreateTable(string& _table, vector<string>& _attributes,
 
 	}
 
+	int tableiter = 0;
+	for(int i = 0; i < tableData.size(); i++){
+
+		tableiter++;
+
+	}
+
 	//cout << "BUILDING TEMP TABLE" << endl;
 	tbld tempTableData;
 	vector<atdata> tempatdata;
@@ -459,6 +468,8 @@ bool Catalog::CreateTable(string& _table, vector<string>& _attributes,
 	tempTableData.name = _table;
 	//cout << "ASSIGNED NAME" << endl;
 	vector<unsigned int> distVal;
+
+	tempTableData.tNum = tableiter + 1;
 
 
 	for(int i = 0; i < _attributes.size(); i++){
@@ -468,6 +479,7 @@ bool Catalog::CreateTable(string& _table, vector<string>& _attributes,
 		tempa.attName = _attributes[i];
 		//cout << "ASSIGNED ATT NAME " << endl;
 		tempa.attType = _attributeTypes[i];
+		tempa.numOrder = i;
 		//cout << "ASSIGNED ATT TYPE " << endl;
 		distVal.push_back(0);
 		tempatdata.push_back(tempa);
