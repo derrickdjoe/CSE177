@@ -121,7 +121,11 @@ int Schema::Project(vector<int>& _attsToKeep) {
 	int numAtts = atts.size();
 	
 	// too many attributes to keep
-	if (numAttsToKeep > numAtts) return -1;
+	if (numAttsToKeep > numAtts){
+		 cout << "too many" << endl; 
+		 return -1;
+
+	}
 
 	vector<Attribute> copy; atts.swap(copy);
 
@@ -134,13 +138,16 @@ int Schema::Project(vector<int>& _attsToKeep) {
 		else {
 			atts.swap(copy);
 			copy.clear();
-
+			cout << "---" << endl;
+			cout << numAtts << endl;
+			cout << index << endl;
+			cout << "Index OOB" << endl;
 			return -1;
 		}
 	}
 
 	copy.clear();
-
+	cout << "Project good" << endl;
 	return 0;
 }
 

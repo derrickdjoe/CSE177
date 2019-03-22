@@ -40,20 +40,27 @@ Catalog::Catalog(string& _fileName) {
 				lastTbl = tName;
 				unsigned int tnt = sqlite3_column_int(stmt, 1);
 				string tPath = reinterpret_cast<const char*> (sqlite3_column_text(stmt, 2));
+				unsigned int tblIDN = sqlite3_column_int(stmt, 7);
 	
 				tbld temp;
 				temp.name = tName;
 				temp.tupN = tnt;
 				temp.fileL = tPath;
+				//cout << "STORING " << tblIDN << " AS " << tName << " ID " << endl;
+				temp.tNum = tblIDN;
 
 				string aName = reinterpret_cast<const char*> (sqlite3_column_text(stmt, 3));
 				string aType = reinterpret_cast<const char*> (sqlite3_column_text(stmt, 4));
 				unsigned int noD = sqlite3_column_int(stmt, 5);
+				unsigned int attIDN = sqlite3_column_int(stmt, 6);
+
+				//cout << "STORING " << aName << " AS " << attIDN << " ID " << endl;
 
 				atdata temp1;
 				temp1.attName = aName;
 				temp1.attType = aType;
 				temp1.disVal = noD;
+				temp1.numOrder = attIDN;
 
 
 				temp.attble.push_back(temp1);
@@ -70,14 +77,19 @@ Catalog::Catalog(string& _fileName) {
 						string aName = reinterpret_cast<const char*> (sqlite3_column_text(stmt, 3));
 						string aType = reinterpret_cast<const char*> (sqlite3_column_text(stmt, 4));
 						unsigned int noD = sqlite3_column_int(stmt, 5);
+						unsigned int attIDN = sqlite3_column_int(stmt, 6);
+
+						//cout << "STORING " << aName << " AS " << attIDN << " ID " << endl;
 
 						atdata temp1;
 						temp1.attName = aName;
 						temp1.attType = aType;
 						temp1.disVal = noD;
+						temp1.numOrder = attIDN;
 
 
 						tableData[i].attble.push_back(temp1);
+						//cout << "Put into " << tableData[i].name << endl;
 						//fprintf(stdout, "PUSHED \t%s \t%s \t%u \tINTO \t%s\n", aName.c_str(), aType.c_str(), noD, tName.c_str());
 
 					}
@@ -100,22 +112,33 @@ Catalog::Catalog(string& _fileName) {
 
 		//schema helper
 		
-		vector<string> schHelper;
-		vector<string> schHelper1;
-		vector<unsigned int>schHelper2;
+		//vector<string> schHelper;
+		//vector<string> schHelper1;
+		//vector<unsigned int>schHelper2;
 
 		for(int i = 0; i < tableData.size(); i++){
 
+			vector<string> schHelper;
+			vector<string> schHelper1;
+			vector<unsigned int>schHelper2;
+
 			for(int j = 0; j < tableData[i].attble.size(); j++){
+
+				//cout << "putting atts into " << tableData[i].name << endl;
 
 				schHelper.push_back(tableData[i].attble[j].attName);
 				schHelper1.push_back(tableData[i].attble[j].attType);
 				schHelper2.push_back(tableData[i].attble[j].disVal);
 
 			}
-
-
+			
+			//cout << "Assigning schema to " << tableData[i].name << endl;
 			tableData[i].sch = Schema(schHelper, schHelper1, schHelper2);
+
+			//cout << "--------------" << endl;
+			//cout << "Table " << i << endl;
+			//cout << tableData[i].name << endl;
+			//cout << tableData[i].sch << endl;
 
 		}
 
@@ -207,6 +230,7 @@ bool Catalog::Save() {
 			rc = sqlite3_bind_int(stmt, 5, tableData[i].attble[j].numOrder);
 			rc = sqlite3_step(stmt);
 			
+			//cout << "PUTTING " << tableData[i].attble[j].numOrder << " ----- " << endl;
 			//fprintf(stdout, "INSERTING THE FOLLOWING INTO %s\n", tableData[i].name.c_str());
 			//fprintf(stdout, "%s \t%s \t%u \n", tableData[i].attble[j].attName.c_str(), tableData[i].attble[j].attType.c_str(), tableData[i].attble[j].disVal);
 
@@ -237,6 +261,7 @@ bool Catalog::Save() {
 		rc = sqlite3_bind_int(stmt, 4, tableData[i].tNum);
 		rc = sqlite3_step(stmt);
 		
+		//cout << "PUTTING " << tableData[i].tNum << " AS  " << tableData[i].name << " ID " << endl;
 		//fprintf(stdout, "%s \t%u \t%s\n", tableData[i].name.c_str(), tableData[i].tupN, tableData[i].fileL.c_str());
 
 		if(rc != SQLITE_DONE){
@@ -248,6 +273,7 @@ bool Catalog::Save() {
 	}
 
 	sqlite3_finalize(stmt);
+	return true;
 	//cout << "DATAFIED TABLE TABLE" << endl;
 	
 
