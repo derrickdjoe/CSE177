@@ -28,6 +28,8 @@ public:
 	// swap function
 	void Swap(Record& _other);
 
+	vector<double> smartHelper;
+
 	virtual ~Record();
 
 	// reads the next record from a pointer to a text file; also requires
@@ -74,6 +76,9 @@ public:
 	//numAttsLeft and numAttsRight specify the number of attributes in Left and Right
 	void AppendRecords (Record& left, Record& right,
 		int numAttsLeft, int numAttsRight);
+
+	string keyBuilder(Schema& _schema);
+	void addToVec(double dub);
 
 	// print record content based on schema
     ostream& print(ostream& _os, Schema& mySchema);

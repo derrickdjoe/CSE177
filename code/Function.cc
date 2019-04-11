@@ -347,3 +347,31 @@ Type Function :: Apply (Record& toMe, int &intResult, double &doubleResult) {
 		return Float;
 	}
 }
+
+bool Function::HasStuff(){
+
+	if(numOps > 0){
+
+		return true;
+
+	}else{
+
+		return false;
+	
+	}
+
+}
+
+Type Function::GetAttType(){
+
+	if(returnsInt == 1){
+
+		return Integer;
+
+	}else{
+
+		return Float;
+
+	}
+
+}

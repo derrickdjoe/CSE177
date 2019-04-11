@@ -2,6 +2,7 @@
 #include "RelOp.h"
 #include <cstring>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -423,6 +424,46 @@ DuplicateRemoval::~DuplicateRemoval() {
 
 }
 
+bool DuplicateRemoval::GetNext(Record& _record) {
+
+	while(producer->GetNext(_record)){
+
+		stringstream ss;
+		bool isFound = false;
+		_record.print(ss, schema);
+
+		/*unordered_set<string>::iterator it = hash_tbl.find(ss.str());
+		if(it == hash_tbl.end()) {
+
+			hash_tbl.insert(ss.str());
+			return true;
+
+		}*/
+
+		for(int i = 0; i < dList.size(); i++){
+
+			if(ss.str() == dList[i]){
+		
+				isFound = true;
+
+			}
+
+		}
+
+		if(isFound == false){
+
+			dList.push_back(ss.str());
+			isFound = false;
+			return true;
+
+		}
+
+	}
+
+	return false;
+
+}
+
 ostream& DuplicateRemoval::print(ostream& _os) {
 
 	_os << "DISTINCT ";
@@ -456,6 +497,54 @@ Sum::~Sum() {
 
 }
 
+bool Sum::GetNext(Record& _record){
+
+	Type typeHolder;
+	double runningSum;
+	bool isDone = false;
+	
+	Record tempRec;
+	while(producer->GetNext(tempRec)){
+
+		int intHolder = 0;
+		double dubsHolder = 0;
+		typeHolder = compute.Apply(tempRec, intHolder, dubsHolder);
+		runningSum += intHolder + dubsHolder;
+	
+		isDone = true;
+
+	}
+
+	if(isDone){
+
+		int recSize;
+		if(typeHolder == Integer){
+
+			char* whatIWant = new char[sizeof(int)];
+
+			sprintf(whatIWant, "%d", (int)runningSum);
+			_record.Consume(whatIWant);
+			return true;
+
+		}else{
+
+			char* whatIWant = new char[sizeof(double)];
+
+			snprintf(whatIWant, recSize, "%f", runningSum);
+			_record.Consume(whatIWant);
+			return true;
+
+		}
+
+
+	}else{
+
+		return false;
+
+	}
+
+}
+
 ostream& Sum::print(ostream& _os) {
 
 	_os << "SUM";
@@ -476,9 +565,208 @@ ostream& Sum::print(ostream& _os) {
 GroupBy::GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtts,
 	Function& _compute,	RelationalOp* _producer) : schemaIn(_schemaIn), schemaOut(_schemaOut), groupingAtts(_groupingAtts), compute(_compute), producer(_producer) {
 
+	isFirst = true;
+	//iter = 0;
 }
 
 GroupBy::~GroupBy() {
+
+}
+
+bool GroupBy::GetNext(Record& _record){
+
+	cout << "GROUP BY GET NEXT" << endl;
+
+	bool hasStuff = compute.HasStuff();
+
+	//cout << "STUFF TO GROUP BY" << endl;
+
+	if(isFirst){
+
+		Record rec;
+
+		//cout << "DOING AGGEGRATE" << endl;
+
+		while(producer->GetNext(rec)) {
+
+			double runningSum = 0;
+			Schema tempSch = schemaOut;
+			vector<int> attL;
+
+			if(hasStuff) {
+
+				int intHolder = 0;
+				double dubsHolder = 0;
+
+				compute.Apply(rec, intHolder, dubsHolder);
+				runningSum = dubsHolder + intHolder;
+			
+
+				for(int i = 1; i < schemaOut.GetNumAtts(); i++){
+
+					attL.push_back(i);
+
+				}
+
+				tempSch.Project(attL);
+
+			}
+
+			rec.Project(&groupingAtts.whichAtts[0], groupingAtts.numAtts, schemaIn.GetNumAtts());
+
+			string key = rec.keyBuilder(tempSch);
+
+			/*if(groupListVec.size() == 0){
+
+				groupData tempHolder;
+
+				tempHolder.rec = &rec;
+				tempHolder.rec = rec;
+				tempHolder.stuffFromRecord = rec.getStuff(tempSch);
+				tempHolder.sum = runningSum;
+				tempHolder.key = key;
+
+				groupListVec.push_back(tempHolder);
+				cout << " ADDING NEW KEY " << endl;
+
+			}else{
+
+			
+				bool isFound = false;
+				for(int i = 0; i < groupListVec.size(); i++){
+
+					if(groupListVec[i].key == key){
+
+						groupListVec[i].sum += runningSum;
+						cout << " ADDING SUM " << endl;
+						isFound = true;
+						break;
+
+					}
+
+
+				}
+
+				if(!isFound){
+
+					groupData tempHolder;
+					tempHolder.rec = &rec;
+					tempHolder.rec = rec;
+					tempHolder.stuffFromRecord = rec.getStuff(tempSch);
+					tempHolder.sum = runningSum;
+					tempHolder.key = key;
+
+					groupListVec.push_back(tempHolder);
+					cout << " ADDING NEW KEY " << endl;
+					isFound = false;
+
+				}
+
+			}*/
+			
+
+			if(groupListMap.find(key) == groupListMap.end()){
+
+				cout << key << " FIRST KEY " << endl;
+
+				groupData tempHolder;
+				tempHolder.rec = rec;
+				tempHolder.sum = runningSum;
+			
+				groupListMap[key] = tempHolder;
+
+				cout << key << " THIS IS KEY " << endl;
+
+			}else{
+
+				groupListMap[key].sum += runningSum;
+
+			}
+
+		}
+
+		groupListIter = groupListMap.begin();
+		isFirst = false;
+
+	}
+
+	if(groupListIter != groupListMap.end()){
+
+		Record recToCreate;
+
+		if(hasStuff) {
+
+			Type holder = compute.GetAttType();
+			Record runningSumRec;
+			int recSize;
+			double dubHolder = 0;
+			int intHolder = 0;
+	
+			if(holder == Integer){
+
+				char* whatIWant = new char[sizeof(int)];
+
+				sprintf(whatIWant, "%d", (int)(*groupListIter).second.sum);
+				//sprintf(whatIWant, "%d", (int)groupListVec[iter].sum);
+
+				char* toCopy = new char[sizeof(int) + sizeof(int) + sizeof(int)];
+				((int*) toCopy)[0] = sizeof(int) + sizeof(int) + sizeof(int);
+				((int*) toCopy)[1] = sizeof(int) + sizeof(int);
+				memcpy(toCopy + sizeof(int) + sizeof(int), whatIWant, sizeof(double));
+
+				runningSumRec.Consume(whatIWant);
+				_record.addToVec((*groupListIter).second.sum);
+
+				//_record.addToVec(groupListVec[iter].sum);
+
+
+			}else{
+
+				char* whatIWant = new char[sizeof(double)];
+
+				snprintf(whatIWant, recSize, "%f", (*groupListIter).second.sum);
+				//snprintf(whatIWant, recSize, "%f", groupListVec[iter].sum);
+
+				char* toCopy = new char[sizeof(int) + sizeof(int) + sizeof(double)];
+				((int*) toCopy)[0] = sizeof(int) + sizeof(int) + sizeof(double);
+				((int*) toCopy)[1] = sizeof(int) + sizeof(int);
+				memcpy(toCopy + sizeof(int) + sizeof(int), whatIWant, sizeof(double));
+
+				runningSumRec.Consume(toCopy);
+				_record.addToVec((*groupListIter).second.sum);
+
+				//_record.addToVec(groupListVec[iter].sum);
+
+
+			}
+
+			Record otherRec;
+
+			recToCreate.AppendRecords(runningSumRec, (*groupListIter).second.rec, 1, schemaOut.GetNumAtts() - 1);
+
+			//recToCreate.AppendRecords(runningSumRec, *groupListVec[iter].rec, 1, schemaOut.GetNumAtts() - 1);
+			//groupListVec[iter].rec->Nullify();
+			(*groupListIter).second.rec.Nullify();
+
+		}else{
+
+			recToCreate.Swap((*groupListIter).second.rec);
+			
+			//recToCreate.Swap(*groupListVec[iter].rec);
+
+		}
+
+		_record = recToCreate;
+		groupListIter++;
+		//iter++;
+
+		return true;
+
+	}else{
+
+		return false;
+
+	}
 
 }
 

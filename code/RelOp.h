@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <unordered_map>
 
 #include "Schema.h"
 #include "Record.h"
@@ -175,11 +176,13 @@ private:
 	// operator generating data
 	RelationalOp* producer;
 
+	vector<string> dList;
+
 public:
 	DuplicateRemoval(Schema& _schema, RelationalOp* _producer);
 	virtual ~DuplicateRemoval();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
 
 	virtual Schema GetSchema(){
 
@@ -209,7 +212,7 @@ public:
 		RelationalOp* _producer);
 	virtual ~Sum();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
 
 	virtual Schema GetSchema(){
 
@@ -223,6 +226,22 @@ public:
 
 class GroupBy : public RelationalOp {
 private:
+
+	struct groupData{
+		
+		//Record* rec;
+		Record rec;
+		double sum;
+		//string key;
+
+	};
+
+	bool isFirst;
+	//int iter;
+	//vector<groupData> groupListVec;
+	unordered_map<string, groupData> groupListMap;
+	unordered_map<string, groupData>::iterator groupListIter;
+
 	// schema of records input to operator
 	Schema schemaIn;
 	// schema of records output by operator
@@ -241,7 +260,7 @@ public:
 		Function& _compute,	RelationalOp* _producer);
 	virtual ~GroupBy();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
 
 	virtual Schema GetSchema(){
 

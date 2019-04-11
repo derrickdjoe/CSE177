@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
-
+#include <sstream>
 #include "Config.h"
 #include "Swap.h"
 #include "Schema.h"
@@ -423,8 +423,25 @@ ostream& Record :: print(ostream& _os, Schema& mySchema) {
 		else if (atts[i].type == String) {
 			char *myString = (char *) &(bits[pointer]);
 			_os << myString;
-		} 
+		} else {
 
+			cout << "TYPE UNKNOWN" << endl;
+			
+			if(atts[i].name == "sum"){
+
+				_os << bits;
+
+			}else{
+
+				for(int i = 0; i < smartHelper.size(); i++){
+
+					_os << smartHelper[i];
+
+				}
+
+			}
+
+		}
 		// print out a comma as needed to make things pretty
 		if (i != n - 1) {
 			_os << ", ";
@@ -432,4 +449,70 @@ ostream& Record :: print(ostream& _os, Schema& mySchema) {
 	}
 
 	return _os;
+}
+
+string Record::keyBuilder(Schema& mySchema){
+
+	stringstream toKey;
+	int n = mySchema.GetNumAtts();
+	vector<Attribute> atts = mySchema.GetAtts();
+
+	// loop through all of the attributes
+	for (int i = 0; i < n; i++) {
+		// print the attribute name
+		toKey << atts[i].name << ":";
+
+		// use the i^th slot at the head of the record to get the
+		// offset to the correct attribute in the record
+		int pointer = ((int *) bits)[i + 1];
+
+		// here we determine the type, which given in the schema;
+		// depending on the type we then print out the contents
+		// first is integer
+		if (atts[i].type == Integer) {
+			int *myInt = (int *) &(bits[pointer]);
+			toKey << *myInt;
+		}
+		// then is a double
+		else if (atts[i].type == Float) {
+			double *myDouble = (double *) &(bits[pointer]);
+			toKey << *myDouble;
+		}
+		// then is a character string
+		else if (atts[i].type == String) {
+			char *myString = (char *) &(bits[pointer]);
+			toKey << myString;
+		} else {
+
+			cout << "TYPE UNKNOWN" << endl;
+			
+			if(atts[i].name == "sum"){
+
+				toKey << bits;
+
+			}else{
+
+				for(int i = 0; i < smartHelper.size(); i++){
+
+					toKey << smartHelper[i];
+
+				}
+
+			}
+
+		}
+		// print out a comma as needed to make things pretty
+		if (i != n - 1) {
+			toKey << ", ";
+		}
+	}
+
+	return toKey.str();
+
+}
+
+void Record::addToVec(double dub){
+
+	smartHelper.push_back(dub);
+
 }
