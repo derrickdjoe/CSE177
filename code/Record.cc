@@ -435,7 +435,25 @@ ostream& Record :: print(ostream& _os, Schema& mySchema) {
 
 				for(int i = 0; i < smartHelper.size(); i++){
 
-					_os << smartHelper[i];
+					if(smartHelper[i] == 1){
+						
+						cout << "PRINTING INT" << endl;
+						int *myInt = (int *) &(bits[pointer]);
+						_os << *myInt;
+
+					}else if(smartHelper[i] == 2){
+
+						cout << "PRINTING DOUBLE" << endl;
+						double *myDouble = (double *) &(bits[pointer]);
+						_os << *myDouble;
+
+					} else {
+
+						cout << "NOT VALID TYPE" << endl;
+						
+					}				
+
+					//_os << smartHelper[i];
 
 				}
 

@@ -622,7 +622,6 @@ bool GroupBy::GetNext(Record& _record){
 
 				tempHolder.rec = &rec;
 				tempHolder.rec = rec;
-				tempHolder.stuffFromRecord = rec.getStuff(tempSch);
 				tempHolder.sum = runningSum;
 				tempHolder.key = key;
 
@@ -652,7 +651,6 @@ bool GroupBy::GetNext(Record& _record){
 					groupData tempHolder;
 					tempHolder.rec = &rec;
 					tempHolder.rec = rec;
-					tempHolder.stuffFromRecord = rec.getStuff(tempSch);
 					tempHolder.sum = runningSum;
 					tempHolder.key = key;
 
@@ -698,61 +696,56 @@ bool GroupBy::GetNext(Record& _record){
 
 			Type holder = compute.GetAttType();
 			Record runningSumRec;
-			int recSize;
-			double dubHolder = 0;
-			int intHolder = 0;
+			int whereAmI = sizeof(int) + sizeof(int);
 	
 			if(holder == Integer){
 
-				char* whatIWant = new char[sizeof(int)];
+				char* whatIWant = new char[1];
 
-				sprintf(whatIWant, "%d", (int)(*groupListIter).second.sum);
+				((int*)whatIWant)[0] = whereAmI + sizeof(int);
+				((int*)whatIWant)[1] = whereAmI;
+				*((int*)&whatIWant[whereAmI]) = (int)(*groupListIter).second.sum;
+
+				//sprintf(whatIWant, "%d", (int)(*groupListIter).second.sum);
 				//sprintf(whatIWant, "%d", (int)groupListVec[iter].sum);
 
-				char* toCopy = new char[sizeof(int) + sizeof(int) + sizeof(int)];
-				((int*) toCopy)[0] = sizeof(int) + sizeof(int) + sizeof(int);
-				((int*) toCopy)[1] = sizeof(int) + sizeof(int);
-				memcpy(toCopy + sizeof(int) + sizeof(int), whatIWant, sizeof(double));
+				char* toCopy = new char[whereAmI + sizeof(int)];
+				memcpy(toCopy, whatIWant, whereAmI + sizeof(int));
 
-				runningSumRec.Consume(whatIWant);
-				_record.addToVec((*groupListIter).second.sum);
+				runningSumRec.Consume(toCopy);
+				_record.addToVec(1);
 
 				//_record.addToVec(groupListVec[iter].sum);
 
 
 			}else{
 
-				char* whatIWant = new char[sizeof(double)];
+				char* whatIWant = new char[1];
 
-				snprintf(whatIWant, recSize, "%f", (*groupListIter).second.sum);
-				//snprintf(whatIWant, recSize, "%f", groupListVec[iter].sum);
+				((int*)whatIWant)[0] = whereAmI + sizeof(double);
+				((int*)whatIWant)[1] = whereAmI;
+				*((double*)&whatIWant[whereAmI]) = (*groupListIter).second.sum;
 
-				char* toCopy = new char[sizeof(int) + sizeof(int) + sizeof(double)];
-				((int*) toCopy)[0] = sizeof(int) + sizeof(int) + sizeof(double);
-				((int*) toCopy)[1] = sizeof(int) + sizeof(int);
-				memcpy(toCopy + sizeof(int) + sizeof(int), whatIWant, sizeof(double));
+				//snprintf(whatIWant, whereAmI + sizeof(double), "%f", (*groupListIter).second.sum);
+				//snprintf(whatIWant, whereAmI + sizeof(double), "%f", groupListVec[iter].sum);
+
+				char* toCopy = new char[whereAmI + sizeof(double)];
+				memcpy(toCopy, whatIWant, whereAmI + sizeof(double));
 
 				runningSumRec.Consume(toCopy);
-				_record.addToVec((*groupListIter).second.sum);
+				_record.addToVec(2);
 
 				//_record.addToVec(groupListVec[iter].sum);
 
 
 			}
 
-			Record otherRec;
-
 			recToCreate.AppendRecords(runningSumRec, (*groupListIter).second.rec, 1, schemaOut.GetNumAtts() - 1);
 
 			//recToCreate.AppendRecords(runningSumRec, *groupListVec[iter].rec, 1, schemaOut.GetNumAtts() - 1);
-			//groupListVec[iter].rec->Nullify();
-			(*groupListIter).second.rec.Nullify();
+
 
 		}else{
-
-			recToCreate.Swap((*groupListIter).second.rec);
-			
-			//recToCreate.Swap(*groupListVec[iter].rec);
 
 		}
 

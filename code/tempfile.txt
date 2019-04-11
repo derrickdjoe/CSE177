@@ -1,36 +1,100 @@
-{c_address: 3txGO AiuFux3zT0Z9NYaFRnZt
-{c_address: eaTXWWm10L9
-{c_address: 9SzDYlkzxByyJ1QeTI o
-{c_address: kDzx11sIjjWJm1
-{c_address: 7U7u2KryFP
-{c_address: O,HceV3 XE77Yx
-{c_address: x5gJ8IGm2Fo9Jigt
-{c_address: 2ZgAkaBgb6aigORfIfUd3kHbPi42
-{c_address: cH6XucXV0V
-{c_address:  UQ5mF3sdoZT2
-{c_address: 8Cw4p1m1gKYVUgomkAq,es1ZtrnmHaO
-{c_address: ,4Jm5N0ruhJCB7cBR6Kw
-{c_address: RNfSXbUJkgUlBBPn
-{c_address: ,TI7FdTc gCXUMi09qD
-{c_address: sssuscPJ,ZYQ8viO
-{c_address: CkGH34iK 9vAHXeY7 wAQIzJa1cmA8DAEA7m
-{c_address: EJwOQMTQnFwvd8r Y7f9i5POy6ZlNkIYxCL hg8t
-{c_address: FoGcDu9llpFiB LELF3rdjaiw RQe1S
-{c_address: J2UwoJEQzAOTtuBrxGVag9iWSUPTp
-{c_address: oQqeEC,OD9XC1JXyOsHqcpv0fPUdP9ek5KKb70tQ
-{c_address: G0, q8c6vBykpiLvcuSJLYvqE
-{c_address: 1j C80VWHe ITCVCV
-{c_address: ge1GEYt4ewGUiSeqBA4rNB5JhyQ92uKF
-{c_address:  8w2pIiA4wWAhtjAdXR
-{c_address: t3qDCo,Yh MZcJFV6PibeY,MUunz
-{c_address: XFnr9C2bANXL
-{c_address: nW1X1Hl9uWycuBEu3F3
-{c_address: 1Uavkms1A5z
-{c_address: m h2wQbujQnQOrcf109reW0 o
-{c_address: a wMc0lQutcHs6cRomoMCGjvM0MwEk4uyrxKI3
-{c_address: gavpg6eW5lEML
-{c_address: pLrF7F1,uoyGaU
-{c_address: HGCJI27,RIIQcS20,DcJbMQuUmN3Vhzdm
-{c_address: rqYSBCMywMKnfcp2DwotVqI
-{c_address: F7 m0JwiCABmbJLPQpCJ2
-{c_address: nUT6kGEr7tmgpJaPgfFtXY
+{SUM: 18525.9, ps_suppkey: 26
+{SUM: 21872.3, ps_suppkey: 25
+{SUM: 22374.6, ps_suppkey: 99
+{SUM: 14551.5, ps_suppkey: 49
+{SUM: 18022.1, ps_suppkey: 24
+{SUM: 15915.8, ps_suppkey: 73
+{SUM: 17303.7, ps_suppkey: 97
+{SUM: 19135.6, ps_suppkey: 50
+{SUM: 18611.8, ps_suppkey: 72
+{SUM: 17844.8, ps_suppkey: 47
+{SUM: 22763.5, ps_suppkey: 71
+{SUM: 20059.7, ps_suppkey: 85
+{SUM: 21972.4, ps_suppkey: 35
+{SUM: 16727.2, ps_suppkey: 10
+{SUM: 20259.1, ps_suppkey: 48
+{SUM: 23761, ps_suppkey: 83
+{SUM: 17502.2, ps_suppkey: 76
+{SUM: 16100, ps_suppkey: 33
+{SUM: 19228, ps_suppkey: 43
+{SUM: 21655, ps_suppkey: 84
+{SUM: 21865.1, ps_suppkey: 81
+{SUM: 19525.3, ps_suppkey: 62
+{SUM: 16143.3, ps_suppkey: 88
+{SUM: 22867.7, ps_suppkey: 16
+{SUM: 17630.8, ps_suppkey: 60
+{SUM: 16696.6, ps_suppkey: 31
+{SUM: 19394.2, ps_suppkey: 8
+{SUM: 21279.1, ps_suppkey: 9
+{SUM: 22163.2, ps_suppkey: 5
+{SUM: 19130.1, ps_suppkey: 28
+{SUM: 22882, ps_suppkey: 58
+{SUM: 17606, ps_suppkey: 6
+{SUM: 16325.3, ps_suppkey: 61
+{SUM: 19198.2, ps_suppkey: 2
+{SUM: 22264.9, ps_suppkey: 98
+{SUM: 20175.8, ps_suppkey: 77
+{SUM: 19679.9, ps_suppkey: 27
+{SUM: 18035.1, ps_suppkey: 59
+{SUM: 20529.3, ps_suppkey: 78
+{SUM: 19419.6, ps_suppkey: 52
+{SUM: 17709.3, ps_suppkey: 20
+{SUM: 17765, ps_suppkey: 45
+{SUM: 18609.8, ps_suppkey: 1
+{SUM: 19355.7, ps_suppkey: 82
+{SUM: 17971.3, ps_suppkey: 32
+{SUM: 22111.7, ps_suppkey: 29
+{SUM: 22356.8, ps_suppkey: 40
+{SUM: 20670.8, ps_suppkey: 94
+{SUM: 21076.7, ps_suppkey: 7
+{SUM: 15893.2, ps_suppkey: 53
+{SUM: 21865.9, ps_suppkey: 4
+{SUM: 20561, ps_suppkey: 23
+{SUM: 18094.8, ps_suppkey: 54
+{SUM: 18165.3, ps_suppkey: 70
+{SUM: 22594.5, ps_suppkey: 55
+{SUM: 18766.1, ps_suppkey: 90
+{SUM: 16786.5, ps_suppkey: 74
+{SUM: 20749.6, ps_suppkey: 34
+{SUM: 20397.4, ps_suppkey: 93
+{SUM: 19578.8, ps_suppkey: 80
+{SUM: 21357.6, ps_suppkey: 11
+{SUM: 21682.1, ps_suppkey: 22
+{SUM: 20769, ps_suppkey: 39
+{SUM: 19197.8, ps_suppkey: 56
+{SUM: 18194.3, ps_suppkey: 21
+{SUM: 20410.5, ps_suppkey: 30
+{SUM: 24345.1, ps_suppkey: 36
+{SUM: 20248.5, ps_suppkey: 51
+{SUM: 19791.7, ps_suppkey: 12
+{SUM: 19587.2, ps_suppkey: 86
+{SUM: 22023.3, ps_suppkey: 100
+{SUM: 19457.9, ps_suppkey: 44
+{SUM: 19375.2, ps_suppkey: 37
+{SUM: 21875.7, ps_suppkey: 13
+{SUM: 18390.3, ps_suppkey: 87
+{SUM: 20046.7, ps_suppkey: 14
+{SUM: 20395.1, ps_suppkey: 79
+{SUM: 20146, ps_suppkey: 17
+{SUM: 18522.3, ps_suppkey: 63
+{SUM: 17725.1, ps_suppkey: 19
+{SUM: 21381.4, ps_suppkey: 64
+{SUM: 20240.7, ps_suppkey: 96
+{SUM: 20287, ps_suppkey: 89
+{SUM: 21723.2, ps_suppkey: 15
+{SUM: 17193.2, ps_suppkey: 41
+{SUM: 19221, ps_suppkey: 57
+{SUM: 21247.2, ps_suppkey: 66
+{SUM: 17949.7, ps_suppkey: 91
+{SUM: 22747.5, ps_suppkey: 42
+{SUM: 22044.5, ps_suppkey: 75
+{SUM: 18448.4, ps_suppkey: 3
+{SUM: 20813.2, ps_suppkey: 67
+{SUM: 19313.5, ps_suppkey: 38
+{SUM: 21244.2, ps_suppkey: 92
+{SUM: 24057.3, ps_suppkey: 18
+{SUM: 21912.8, ps_suppkey: 68
+{SUM: 20469.4, ps_suppkey: 95
+{SUM: 20240.7, ps_suppkey: 69
+{SUM: 20143.7, ps_suppkey: 65
+{SUM: 22410.4, ps_suppkey: 46
