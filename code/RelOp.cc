@@ -432,14 +432,6 @@ bool DuplicateRemoval::GetNext(Record& _record) {
 		bool isFound = false;
 		_record.print(ss, schema);
 
-		/*unordered_set<string>::iterator it = hash_tbl.find(ss.str());
-		if(it == hash_tbl.end()) {
-
-			hash_tbl.insert(ss.str());
-			return true;
-
-		}*/
-
 		for(int i = 0; i < dList.size(); i++){
 
 			if(ss.str() == dList[i]){
@@ -592,6 +584,7 @@ bool GroupBy::GetNext(Record& _record){
 			double runningSum = 0;
 			Schema tempSch = schemaOut;
 			vector<int> attL;
+			stringstream key;
 
 			if(hasStuff) {
 
@@ -614,7 +607,7 @@ bool GroupBy::GetNext(Record& _record){
 
 			rec.Project(&groupingAtts.whichAtts[0], groupingAtts.numAtts, schemaIn.GetNumAtts());
 
-			string key = rec.keyBuilder(tempSch);
+			rec.print(key, tempSch);
 
 			/*if(groupListVec.size() == 0){
 
@@ -623,7 +616,7 @@ bool GroupBy::GetNext(Record& _record){
 				tempHolder.rec = &rec;
 				tempHolder.rec = rec;
 				tempHolder.sum = runningSum;
-				tempHolder.key = key;
+				tempHolder.key = key.str();
 
 				groupListVec.push_back(tempHolder);
 				cout << " ADDING NEW KEY " << endl;
@@ -634,7 +627,7 @@ bool GroupBy::GetNext(Record& _record){
 				bool isFound = false;
 				for(int i = 0; i < groupListVec.size(); i++){
 
-					if(groupListVec[i].key == key){
+					if(groupListVec[i].key == key.str()){
 
 						groupListVec[i].sum += runningSum;
 						cout << " ADDING SUM " << endl;
@@ -652,7 +645,7 @@ bool GroupBy::GetNext(Record& _record){
 					tempHolder.rec = &rec;
 					tempHolder.rec = rec;
 					tempHolder.sum = runningSum;
-					tempHolder.key = key;
+					tempHolder.key = key.str();
 
 					groupListVec.push_back(tempHolder);
 					cout << " ADDING NEW KEY " << endl;
@@ -663,21 +656,19 @@ bool GroupBy::GetNext(Record& _record){
 			}*/
 			
 
-			if(groupListMap.find(key) == groupListMap.end()){
-
-				cout << key << " FIRST KEY " << endl;
+			if(groupListMap.find(key.str()) == groupListMap.end()){
 
 				groupData tempHolder;
 				tempHolder.rec = rec;
 				tempHolder.sum = runningSum;
 			
-				groupListMap[key] = tempHolder;
+				groupListMap[key.str()] = tempHolder;
 
-				cout << key << " THIS IS KEY " << endl;
+				cout << key.str() << " THIS IS KEY " << endl;
 
 			}else{
 
-				groupListMap[key].sum += runningSum;
+				groupListMap[key.str()].sum += runningSum;
 
 			}
 

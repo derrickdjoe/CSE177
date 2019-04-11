@@ -77,7 +77,6 @@ public:
 	void AppendRecords (Record& left, Record& right,
 		int numAttsLeft, int numAttsRight);
 
-	string keyBuilder(Schema& _schema);
 	void addToVec(double dub);
 
 	// print record content based on schema
