@@ -79,8 +79,67 @@ bool Select::GetNext(Record& _record){
 
 		}else{
 
+
 			ret = predicate.Run(_record, constants);
+
 			if(ret){
+
+				/*for(int i = 0; i < predicate.numAnds; i++){
+
+					if(i > 0) {
+
+						cout << " AND ";
+
+					}
+
+					Schema schemaLeft = schema;
+					Schema schemaRight = schema;
+
+					Comparison comp = predicate.andList[i];
+
+					if(comp.operand1 == Left){
+
+						cout << schemaLeft.GetAtts()[comp.whichAtt1].name;
+
+					}else if(comp.operand1 == Right){
+
+						cout << schemaRight.GetAtts()[comp.whichAtt1].name;
+
+					}
+		
+					if(comp.op == Equals){
+			
+						cout << " = ";
+
+					}else if(comp.op == GreaterThan){
+		
+						cout << " > ";
+
+					}else if(comp.op == LessThan){
+
+						cout << " < ";
+					}
+
+					if(comp.operand2 == Left){
+
+						cout << schemaLeft.GetAtts()[comp.whichAtt2].name;
+
+					}else if(comp.operand2 == Right){
+
+						cout << schemaRight.GetAtts()[comp.whichAtt2].name;
+
+					}
+
+				cout << endl;
+
+				}
+
+				cout << "PRINTING SELECT RECORDS" << endl;
+				_record.print(cout, schema);
+				cout << endl;
+				constants.print(cout, schema);
+				cout << endl;
+				cout << "-----------------------" << endl;*/
 
 				return true;
 
@@ -89,26 +148,6 @@ bool Select::GetNext(Record& _record){
 		}
 
 	}
-
-	/*
-	while(producer->GetNext(_record)){
-
-		cout << "AM HERE" << endl;
-
-		//constants.print(cout, schema);
-		//cout << endl;
-		//cout << "RECORD" << endl;
-
-		if(predicate.Run(_record, constants)) {
-
-			cout << "RAN CONSTANTS" << endl;
-			return true;
-
-		}
-
-		cout << "DIDNT RUN" << endl;
-
-	}*/
 
 	return false;
 
@@ -263,17 +302,6 @@ bool Project::GetNext(Record& _record){
 
 	}
 
-	/*if(producer->GetNext(_record)){
-
-		_record.Project(keepMe, numAttsOutput, numAttsInput);
-		return true;
-
-	}else{
-
-		return false;
-
-	}*/
-
 }
 
 ostream& Project::print(ostream& _os) {
@@ -305,9 +333,540 @@ Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 	CNF& _predicate, RelationalOp* _left, RelationalOp* _right) : schemaLeft(_schemaLeft), schemaRight(_schemaRight), schemaOut(_schemaOut), predicate(_predicate), left(_left), right(_right){
 
 	cout << "BUILT JOIN" << endl;
+	isFirst = true;
+	hotPotato = true;
+	leftDone = false;
+	rightDone = false;
+	leftWorking = false;
+	rightWorking = false;
+	isBig = false;
+
+	//TODO figure out how big records are for isBig
+	// need to manually set isBig
+
+	if (predicate.GetSortOrders(orderLeft, orderRight) == 0){
+
+		cout << "Ordermaker Failed" << endl;
+
+	}
+
+	cout << "Ordermaker worked" << endl;
+
 }
 
 Join::~Join() {
+
+}
+
+bool Join::GetNext(Record& _record){
+
+	//cout << predicate.numAnds << " THIS IS NUM ANDS" << endl;
+
+	Comparison comp = predicate.andList[0];
+
+	if(comp.op == GreaterThan || comp.op == LessThan){
+
+		cout << "Using NLJ" << endl;
+
+		if(!NLJ(_record)){
+
+			return false;
+
+		}
+
+		return true;
+
+	}
+
+	if(comp.op == Equals){
+
+		cout << "Using HJ" << endl;
+
+		if(!HJ(_record)){
+
+			return false;
+
+		}
+
+		return true;
+
+	}
+
+	if(comp.op == Equals && isBig){
+	
+		cout << "Using SHJ" << endl;
+		
+		if(!SHJ(_record)){
+
+			return false;
+
+		}
+
+		return true;
+
+	}
+
+	return false;
+
+}
+
+
+bool Join::NLJ(Record& _record){
+
+	//cout << "GROUP BY JOIN" << endl;
+
+	if(isFirst){
+
+		//cout << "AM HERE" << endl;
+		Record rec;
+		while(right->GetNext(rec)){
+
+			Record tempRec;
+			tempRec = rec;
+			recList.Insert(tempRec);
+
+		}
+
+		/*for(int i = 0; i < predicate.numAnds; i++){
+
+			Comparison comp = predicate.andList[i];
+
+			if(comp.operand1 == Left){
+
+				cout << schemaLeft.GetAtts()[comp.whichAtt1].name;
+	
+			}else if(comp.operand1 == Right){
+
+				cout << schemaRight.GetAtts()[comp.whichAtt1].name;
+
+			}
+
+			if(comp.op == Equals){
+
+				cout << " = ";
+
+			}else if(comp.op == GreaterThan){
+
+				cout << " > ";
+
+			}else if(comp.op == LessThan){
+
+				cout << " < ";
+
+			}
+
+			if(comp.operand2 == Left){
+
+				cout << schemaLeft.GetAtts()[comp.whichAtt2].name;
+
+			}else if(comp.operand2 == Right){
+
+				cout << schemaRight.GetAtts()[comp.whichAtt2].name;
+
+			}
+
+			cout << endl;
+
+		}*/
+
+		isFirst = false;
+
+	}
+
+	Record recs;
+	Record newRec;
+	int i = 0;
+	while(left->GetNext(recs)){
+
+		Record tempRec;
+		recList.MoveToStart();
+		while(true){
+
+			if(recList.AtEnd()){
+			
+				break;
+
+			}
+
+			tempRec = recList.Current();
+				
+			if(predicate.Run(recs, tempRec)){
+
+				//cout << "Yes" << endl;
+				/*cout << "FOUND PAIR" << endl;
+				recs.print(cout, schemaLeft);
+				cout << endl;
+				tempRec.print(cout, schemaRight);
+				cout << endl;
+				cout << "---------------------" << endl;*/
+
+				newRec.AppendRecords(recs, tempRec, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
+				_record = newRec;
+				return true;
+	
+			}else{
+
+				//cout << "No" << endl;
+
+			}
+
+			recList.Advance();
+			//cout << "ADVANCED" << endl;
+
+		}
+
+		//cout << "DID 1 iter" << endl;
+		//cout << "Joined " << i << " tuples " << endl;
+		//i++;
+
+	}
+
+	cout << "DONE JOIN" << endl;
+	cout << endl;
+	
+
+	return false;
+
+}
+
+bool Join::HJ(Record& _record){
+
+	if(isFirst){
+
+		Record rec;
+		while(right->GetNext(rec)){
+
+			Record tempRec;
+			tempRec = rec;
+			//tempRec.print(cout, schemaRight);
+			//cout << endl;
+			orderRight.Run(tempRec, tempRec);
+			//tempRec.print(cout, schemaRight);
+			//cout << endl;
+
+			KeyInt intData;
+			intData = 0;
+
+			recHash.Insert(tempRec, intData);
+			//cout << "INSERTED INTO HASH" << endl;
+
+		}
+
+		isFirst = false;
+
+	}
+
+	Record recs;
+	Record newRec;
+	int count = 0;
+
+	cout << hashRecList.Length() << " LENGTH" << endl;
+
+	while(true){
+		
+		if(hashRecList.AtEnd()){
+
+			cout << "Breaking" << endl;
+			break;
+
+		}
+
+		cout << "HERE" << endl;
+		cout << "IN REC LIST" << count << endl;
+		
+		Record recToSend;
+		recToSend = hashRecList.Current();
+		_record = recToSend;
+		hashRecList.Remove(recToSend);
+		//hashRecList.Advance();
+		return true;
+
+	}
+
+	while(left->GetNext(recs)){
+
+		Record tempRec;
+		tempRec = recs;
+		//tempRec.print(cout, schemaLeft);
+		//cout << endl;
+		orderLeft.Run(tempRec, tempRec);
+		//tempRec.print(cout, schemaLeft);
+		//cout << endl;
+		//if(recHash.IsThere(tempRec)){
+
+		//	cout << "FOUND" << endl;
+
+		//}
+
+		cout << "AM HERE" << endl;
+		recHash.MoveToStart();
+		int counter = 0;
+
+		while(true){
+
+			//cout << "SEARCHING" << endl;
+			if(recHash.AtEnd()){
+
+				break;
+
+			}
+
+			Record tempHash;
+			tempHash = recHash.CurrentKey();
+
+			if(predicate.Run(tempRec, tempHash)){
+
+				cout << "FOUND MATCH" << endl;
+				counter++;
+				newRec.AppendRecords(tempRec, tempHash, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
+				hashRecList.Insert(newRec);
+
+			}
+
+			recHash.Advance();
+
+		}
+
+		if(!hashRecList.AtEnd()){
+
+			cout << "Stuck here" << endl;
+			hashRecList.MoveToStart();
+			Record recToSend;
+			recToSend = hashRecList.Current();
+			_record = recToSend;
+			hashRecList.Remove(recToSend);
+			cout << "SENT FIRST IN LIST" << endl;
+			cout << "COUNTER IS " << counter << endl;
+			cout << hashRecList.Length() << endl;
+			return true;
+
+		}
+			
+	}
+
+	return false;
+
+}
+
+bool Join::SHJ(Record& _record){
+
+	while(true){
+
+		if(leftDone && rightDone){
+
+			break;
+
+		}
+
+		if(hotPotato){
+
+			hotPotato = false;
+			rightWorking = false;
+
+			Record rec;
+			while(right->GetNext(rec)){
+
+				Record tempRec;
+				tempRec = rec;
+
+				Record compRec;
+				compRec = rec;
+
+				orderRight.Run(tempRec, tempRec);
+				KeyInt keyInt;
+				keyInt = 1;
+				recHashRight.Insert(tempRec, keyInt);
+
+				//hotPotato = false;
+				rightWorking = true;
+				cout << "Inserted Right" << endl;
+
+
+				if(recHashLeft.Length() != 0){
+
+					//cout << "Hash not empty" << endl;
+
+					recHashLeft.MoveToStart();
+					while(true){
+
+						if(recHashLeft.AtEnd()){
+
+							break;
+
+						}
+
+						Record compLeft;
+;						compLeft = recHashLeft.CurrentKey();
+						
+						//cout << "Here?" << endl;
+						if(predicate.Run(compRec, compLeft)){
+
+							Record newRec;
+							newRec.AppendRecords(compLeft, compRec, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
+							cout << "FOUND DATA" << endl;
+							_record = newRec;
+							return true;
+
+						}
+
+						recHashLeft.Advance();
+
+					}
+
+					//break;
+
+				}
+				
+				break;
+
+			}
+
+			if(!rightWorking){
+
+				cout << "Right Done" << endl;
+				rightDone = true;
+
+			}
+
+		}else{
+
+			hotPotato = true;
+			leftWorking = false;
+			Record rec;
+			while(left->GetNext(rec)){
+
+				Record tempRec;
+				tempRec = rec;
+
+				Record compRec;
+				compRec = rec;
+
+				orderLeft.Run(tempRec, tempRec);
+				KeyInt keyInt;
+				keyInt = 1;
+				recHashLeft.Insert(tempRec, keyInt);
+
+				//hotPotato = true;
+				leftWorking = true;
+				cout << "Inserted Left" << endl;
+
+				if(recHashRight.Length() != 0){
+
+					//cout << "Right hash not empty" << endl;
+					recHashRight.MoveToStart();
+					while(true){
+
+						if(recHashRight.AtEnd()){
+
+							break;
+
+						}
+
+						//cout << "Here?" << endl;
+						Record compRight;
+						compRight = recHashRight.CurrentKey();
+
+						if(predicate.Run(compRec, compRight)){
+
+							cout << "FOUND DATA" << endl;
+							Record newRec;
+							newRec.AppendRecords(compRec, compRight, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
+							_record = newRec;
+							return true;
+
+						}
+					
+						//cout << "Advancing" << endl;
+						recHashRight.Advance();
+
+					}
+
+					//break;
+
+				}
+				//cout << "Done left" << endl;
+				break;
+
+			}
+
+			//cout << "HERE???" << endl;
+			if(!leftWorking){
+
+				cout << "Left Done" << endl;
+				leftDone = true;
+
+			}
+
+		}
+
+	}
+
+	/*cout << recHashLeft.Length() << " LEFT LENGTH" << endl;
+	cout << recHashRight.Length() << " RIGHT LENGTH" << endl;
+	
+	if(isFirst){
+
+		recHashRight.MoveToStart();
+		recHashLeft.MoveToStart();
+		isFirst = false;
+		cout << "INIT" << endl;
+
+	}
+
+	while(true){
+
+		if(recHashLeft.AtEnd()){
+
+			//cout << "Breaking Left Hash" << endl;
+			break;
+
+		}
+
+		Record compLeft;
+		compLeft = recHashLeft.CurrentKey();
+		//compLeft.print(cout, schemaLeft);
+		//cout << endl;
+		//cout << "IN HERE" << endl;
+
+		recHashRight.MoveToStart();
+		while(true){
+
+			if(recHashRight.AtEnd()){
+
+				break;
+
+			}
+
+			Record compRight;
+			compRight = recHashRight.CurrentKey();
+			//compRight.print(cout, schemaRight);
+			//cout << endl;
+			//cout << "-----------------------" << endl;
+
+			if(predicate.Run(compLeft, compRight)){
+
+				cout << "FOUND STUFF" << endl;
+				Record newRec;
+				newRec.AppendRecords(compLeft, compRight, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
+
+				newRec.print(cout, schemaOut);
+				cout << endl;
+
+				_record = newRec;
+				recHashRight.Advance();
+				return true;
+
+			}
+
+			recHashRight.Advance();
+
+		}
+
+		recHashLeft.Advance();
+
+	}*/
+
+	return false;
 
 }
 

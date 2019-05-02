@@ -10,6 +10,10 @@
 #include "DBFile.h"
 #include "Function.h"
 #include "Comparison.h"
+#include "InefficientMap.h"
+#include "InefficientMap.cc"
+#include "Keyify.h"
+#include "Keyify.cc"
 
 #include <fstream>
 
@@ -152,12 +156,36 @@ private:
 	RelationalOp* left;
 	RelationalOp* right;
 
+	OrderMaker orderLeft;
+	OrderMaker orderRight;
+
+	TwoWayList<Record> recList;
+	TwoWayList<Record> hashRecList;
+	//typedef Keyify<Record> recKey;
+	//typedef Keyify<int> intKey;
+	InefficientMap<Record, KeyInt> recHash;
+	//unordered_map<Record, int> recMap;
+
+	InefficientMap<Record, KeyInt> recHashLeft;
+	InefficientMap<Record, KeyInt> recHashRight;
+
+	bool isFirst;
+	bool hotPotato;
+	bool leftDone;
+	bool rightDone;
+	bool leftWorking;
+	bool rightWorking;
+	bool isBig;
+
 public:
 	Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 		CNF& _predicate, RelationalOp* _left, RelationalOp* _right);
 	virtual ~Join();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
+	virtual bool NLJ(Record& _record);
+	virtual bool HJ(Record& _record);
+	virtual bool SHJ(Record& _record);
 
 	virtual Schema GetSchema() {
 
