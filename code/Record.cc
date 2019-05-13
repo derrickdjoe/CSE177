@@ -425,11 +425,32 @@ ostream& Record :: print(ostream& _os, Schema& mySchema) {
 			_os << myString;
 		} else {
 
-			cout << "TYPE UNKNOWN" << endl;
+			//cout << "TYPE UNKNOWN" << endl;
 			
 			if(atts[i].name == "sum"){
 
-				_os << bits;
+				//_os << bits;
+				for(int i = 0; i < smartHelper.size(); i++){
+
+					if(smartHelper[i] == 1){
+						
+						//cout << "PRINTING INT" << endl;
+						int *myInt = (int *) &(bits[pointer]);
+						_os << *myInt;
+
+					}else if(smartHelper[i] == 2){
+
+						//cout << "PRINTING DOUBLE" << endl;
+						double *myDouble = (double *) &(bits[pointer]);
+						_os << *myDouble;
+
+					} else {
+
+						//cout << "NOT VALID TYPE" << endl;
+						
+					}	
+
+				}	
 
 			}else{
 
@@ -437,19 +458,19 @@ ostream& Record :: print(ostream& _os, Schema& mySchema) {
 
 					if(smartHelper[i] == 1){
 						
-						cout << "PRINTING INT" << endl;
+						//cout << "PRINTING INT" << endl;
 						int *myInt = (int *) &(bits[pointer]);
 						_os << *myInt;
 
 					}else if(smartHelper[i] == 2){
 
-						cout << "PRINTING DOUBLE" << endl;
+						//cout << "PRINTING DOUBLE" << endl;
 						double *myDouble = (double *) &(bits[pointer]);
 						_os << *myDouble;
 
 					} else {
 
-						cout << "NOT VALID TYPE" << endl;
+						//cout << "NOT VALID TYPE" << endl;
 						
 					}				
 

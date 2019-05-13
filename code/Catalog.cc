@@ -23,7 +23,7 @@ Catalog::Catalog(string& _fileName) {
 
 	}else{
 
-		fprintf(stderr, "Opened db %s\n", _fileName.c_str());
+	//	fprintf(stderr, "Opened db %s\n", _fileName.c_str());
 		sql = "SELECT t.name, t.noTuples, t.path, a.name , a.type, a.noDistinct, a.atO, t.tum FROM tableL t, attributeL a WHERE t.name == a.tblN ORDER BY t.tum, a.atO;";
 		rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0);
 

@@ -47,13 +47,13 @@ int DBFile::Open (char* f_path) {
 	struct stat fileStat;
 	if(stat(f_path, &fileStat) != 0){
 
-		cout << "CREATING FILE CANT FIND" << endl;
+		//cout << "CREATING FILE CANT FIND" << endl;
 		return Create(f_path, Heap);
 
 	}else{
 
-		cout << "FOUND FILE" << endl;
-		cout << fileStat.st_size << " <- SIZE FOUND " << endl;
+		//cout << "FOUND FILE" << endl;
+		//cout << fileStat.st_size << " <- SIZE FOUND " << endl;
 		return file.Open(fileStat.st_size, f_path);
 
 	}
@@ -101,8 +101,8 @@ void DBFile::Load (Schema& schema, char* textFile) {
 
 	file.AddPage(page, currPage++);
 	page.EmptyItOut();
-	cout << file.GetLength() << " FILE SIZE " << endl;
-	cout << currPage << " PAGES " << endl;
+	//cout << file.GetLength() << " FILE SIZE " << endl;
+	//cout << currPage << " PAGES " << endl;
 	fclose(f);
 
 }
@@ -115,7 +115,7 @@ int DBFile::Close () {
 
 void DBFile::MoveFirst () {
 
-	cout << "IN MOVE FIRST" << endl;
+	//cout << "IN MOVE FIRST" << endl;
 	currPage = 0;
 	isFirst = true;
 	page.EmptyItOut();
@@ -129,12 +129,12 @@ void DBFile::AppendRecord (Record& rec) {
 
 	while(!page.Append(rec)){
 		
-		cout << "PAGE FULL MAKING NEW ONE" << endl;
+		//cout << "PAGE FULL MAKING NEW ONE" << endl;
 		file.AddPage(page, currPage++);
 		page.EmptyItOut();
 		//page.Append(rec);
-		cout << file.GetLength() << " FILE SIZE " << endl;
-		cout << currPage << " PAGES " << endl;
+		//cout << file.GetLength() << " FILE SIZE " << endl;
+		//cout << currPage << " PAGES " << endl;
 
 	}
 
@@ -222,6 +222,6 @@ int DBFile::GetNext (Record& rec) {
 
 void DBFile::SetZero (){
 
-	cout << "BEEP BEEP SET ZERO" << endl;
+	//cout << "BEEP BEEP SET ZERO" << endl;
 	currPage = 0;
 }

@@ -27,12 +27,12 @@ void QueryOptimizer::Optimize(TableList* _tables, AndList* _predicate,
 	//use this for now lol
 	vector<string> tableNList;
 
-	cout << "IN OPTIMIZER" << endl;
+	//cout << "IN OPTIMIZER" << endl;
 
 	while(tableIter != NULL){
 
 		tableNList.push_back(string(tableIter->tableName));
-		cout << "PUT " << tableNList[counter] << " INTO VECTOR " << endl;
+		//cout << "PUT " << tableNList[counter] << " INTO VECTOR " << endl;
 		tableIter = tableIter->next;
 		counter++;
 
@@ -124,7 +124,7 @@ void QueryOptimizer::Optimize(TableList* _tables, AndList* _predicate,
 
 	}else{
 
-		cout << "BUILDING MORE THAN 2 TABLES" << endl;
+		//cout << "BUILDING MORE THAN 2 TABLES" << endl;
 
 		OptimizationTree* node = new OptimizationTree;
 		OptimizationTree* nodeLeft = new OptimizationTree;
@@ -156,7 +156,7 @@ void QueryOptimizer::Optimize(TableList* _tables, AndList* _predicate,
 
 		while(abc < tableNList.size()){
 
-			cout << "DOING RECURISVE ADD" << endl;
+			//cout << "DOING RECURISVE ADD" << endl;
 			node = OpHelper(node, tableNList, abc);
 			if(abc == tableNList.size() - 1){
 
@@ -221,7 +221,7 @@ void QueryOptimizer::Optimize(TableList* _tables, AndList* _predicate,
 		}*/
 
 		*_root = *node;
-		cout << "DID THIS" << endl;
+		//cout << "DID THIS" << endl;
 
 	}
 

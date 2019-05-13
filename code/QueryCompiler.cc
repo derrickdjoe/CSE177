@@ -80,99 +80,6 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 			cnf.ExtractCNF(*_predicate, sch, literal);
 			//cout << cnf.ExtractCNF(*_predicate, sch, literal) << endl;
 
-		for(int i = 0; i < cnf.numAnds; i++){
-
-		if(i > 0){
-
-			cout << " AND ";
-
-		}
-		
-		vector<Attribute> attL = sch.GetAtts();
-		Comparison comp = cnf.andList[i];
-
-		if(comp.operand1 != Literal) {
-
-			cout << attL[comp.whichAtt1].name;
-
-		}else{
-
-			int pointer = ((int *)literal.GetBits())[comp.whichAtt1 + 1];
-
-			if(comp.attType == Integer){
-
-				int* pInt = (int *)&(literal.GetBits()[pointer]);
-				//cout << endl;
-				//cout << "THIS IS AN INT" << endl;
-				cout << *pInt;
-
-			}else if(comp.attType == Float){
-
-				double* pDouble = (double *)&(literal.GetBits()[pointer]);
-				//cout << endl;
-				//cout << "THIS IS A FLAOT" << endl;
-				cout << *pDouble;
-
-			}else if(comp.attType == String){
-
-				char* pCh = (char *)&(literal.GetBits()[pointer]);
-				cout << pCh;
-
-			}
-
-		}
-
-		if(comp.op == Equals){
-
-			cout << " = ";
-
-		}else if(comp.op == GreaterThan){
-
-			cout << " > ";
-		
-		}else if(comp.op == LessThan){
-
-			cout << " < ";
-
-		}
-
-		if(comp.operand2 != Literal) {
-			
-			//cout << "NOT LITERAL " << endl;
-			cout << attL[comp.whichAtt2].name;
-
-		}else{
-
-			int pointer = ((int *)literal.GetBits())[comp.whichAtt2 + 1];
-
-			if(comp.attType == Integer){
-
-				int* pInt = (int *)&(literal.GetBits()[pointer]);
-				//cout << endl;
-				//cout << "THIS IS AN INT" << endl;
-				cout << *pInt;
-
-			}else if(comp.attType == Float){
-
-				//cout << comp.attType << " TYPE " << endl;
-				double* pDouble = (double *)&(literal.GetBits()[pointer]);
-				//cout << endl;
-				cout << *pDouble;
-				cout << " THIS IS A FLAOT" << endl;
-
-			}else if(comp.attType == String){
-
-				//cout << comp.attType << " TYPE " << endl;
-				char* pCh = (char *)&(literal.GetBits()[pointer]);
-				cout << pCh;
-				cout << " THIS IS A CHAR" << endl;
-
-			}
-
-		}
-		cout << endl;
-	}
-
 			//literal.print(cout, sch);
 			//cout << "ANYTHING IN HERE?" << endl;
 
@@ -183,7 +90,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 				Select* select = new Select(selSch, cnf, literal, (RelationalOp*)scan);
 				pushDowns[tableName] = (RelationalOp*)select;
-				cout << "Built Select For " << tableName << " " << endl;
+				//cout << "Built Select For " << tableName << " " << endl;
 
 			}
 
@@ -233,19 +140,19 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 		if(_finalFunction == NULL){
 
-			cout << "IN FF" << endl;
+			//cout << "IN FF" << endl;
 			Schema schOut = schIn;
 			int counter = schIn.GetNumAtts();
 			int count = 0;
 
-			cout << "--------------------" << endl;
-			cout << schOut << endl;
+			//cout << "--------------------" << endl;
+			//cout << schOut << endl;
 			vector<int> attL;
 			vector<Attribute> atts = schIn.GetAtts();
 
 			for(int i = 0; i < atts.size(); i++){
 
-				cout << atts[i].name << endl;
+				//cout << atts[i].name << endl;
 
 			}
 
@@ -255,7 +162,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 					if(atts[i].name == _attsToSelect->name){
 
-						cout << "PUSHED ATT "  << atts[i].name << " " << i << " " << endl;
+						//cout << "PUSHED ATT "  << atts[i].name << " " << i << " " << endl;
 						attL.push_back(i);
 						count++;
 						break;
@@ -272,32 +179,32 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 			schOut.Project(attL);
 
 			//cout << schOut.Project(attL) << endl;
-			cout << schOut << endl;
-			cout << "----" << endl;
+			//cout << schOut << endl;
+			//cout << "----" << endl;
 
 			int* keepMe = new int[attL.size()];
 			copy(attL.begin(), attL.end(), keepMe);
 
 			Project* project = new Project(schIn, schOut, counter, count, keepMe, queryTree);
-			cout << "Built Project" << endl;
+			//cout << "Built Project" << endl;
 
 			if(_distinctAtts != 0){
 
 				Schema newschIn = schOut;
 				DuplicateRemoval* distinct = new DuplicateRemoval(newschIn, project);
 				treeRoot = (RelationalOp*)distinct;
-				cout << "ASSIGNED ROOT DIST" << endl;
+				//cout << "ASSIGNED ROOT DIST" << endl;
 
 			}else{
 
 				treeRoot = (RelationalOp*)project;
-				cout << "ASSIGNED ROOT" << endl;
+				//cout << "ASSIGNED ROOT" << endl;
 
 			}
 
 		}else{
 
-			cout << "BUILD FUNC" << endl;
+			//cout << "BUILD FUNC" << endl;
 			Function compute;
 			vector<string> attL;
 			vector<string> attT;
@@ -317,7 +224,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 	}else{
 
-		cout << "BUILD SUM" << endl;
+		//cout << "BUILD SUM" << endl;
 
 		vector<string> attL;
 		vector<string> attT;
@@ -327,7 +234,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 		while(_groupingAtts != NULL){
 
-			cout << "WORKING ON GROUPING ATTS" << endl;
+			//cout << "WORKING ON GROUPING ATTS" << endl;
 
 			string holder;
 			int dVal;
@@ -360,8 +267,8 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 			}
 
 			attL.push_back(nameHolder);
-			cout << nameHolder << endl;
-			cout << "###" << endl;
+			//cout << nameHolder << endl;
+			//cout << "###" << endl;
 			attT.push_back(holder);
 			distinctValues.push_back(dVal);
 			
@@ -387,7 +294,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 			Schema schOut(attL, attT, distinctValues);
 
-			cout << schOut << endl;
+			//cout << schOut << endl;
 
 			Sum* sum = new Sum(schIn, schOut, compute, queryTree);
 			treeRoot = (RelationalOp*)sum;
@@ -395,7 +302,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 		}
 
-		cout << "----" << endl;
+		//cout << "----" << endl;
 		reverse(attL.begin(), attL.end());
 		reverse(attT.begin(), attT.end());
 		reverse(distinctValues.begin(), distinctValues.end());
@@ -451,21 +358,21 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 RelationalOp* QueryCompiler::treeHelper(OptimizationTree*& _tree, unordered_map<string, RelationalOp*>& _pushDowns, AndList* _predicate, int depth){
 
-	cout << "IN QUERYTREE HELPER" << endl;
+	//cout << "IN QUERYTREE HELPER" << endl;
 
 	OptimizationTree* treeHolder = _tree;
 
 	for(int i = 0; i < treeHolder->tables.size(); i++){
 
-		cout << treeHolder->tables[i] << endl;
+		//cout << treeHolder->tables[i] << endl;
 
 	}
 
-	cout << "ALL TABLLES LISTED" << endl;
+	//cout << "ALL TABLLES LISTED" << endl;
 
 	if(treeHolder->leftChild == NULL && treeHolder->rightChild == NULL){
 	
-		cout << "KIDS BOTH NULL" << endl;
+		//cout << "KIDS BOTH NULL" << endl;
 
 		return _pushDowns.find(_tree->tables[0])->second;
 
@@ -479,7 +386,7 @@ RelationalOp* QueryCompiler::treeHelper(OptimizationTree*& _tree, unordered_map<
 
 	}else{
 
-		cout << "BUILDING JOINS" << endl;
+		//cout << "BUILDING JOINS" << endl;
 
 		Schema schemaLeft;
 		Schema schemaRight;

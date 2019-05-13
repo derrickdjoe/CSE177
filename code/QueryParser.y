@@ -16,6 +16,11 @@
 	struct NameList* groupingAtts; // grouping attributes
 	struct NameList* attsToSelect; // the attributes in SELECT
 	int distinctAtts; // 1 if there is a DISTINCT in a non-aggregate query 
+
+	char* table;
+	char* toggle;
+	char* fileLoc;
+	struct AttTypeList* attTypes;
 %}
 
 
@@ -28,6 +33,7 @@
 	struct Operand* myBoolOperand;
 	struct AndList* myAndList;
 	struct NameList* myNames;
+	struct AttTypeList* myAttTypes;
 	char* actualChars;
 	char whichOne;
 }
@@ -45,6 +51,11 @@
 %token WHERE
 %token SUM
 %token AND
+%token CREATE
+%token TABLE
+%token DROP
+%token LOAD
+%token DATA
 
 %type <myAndList> AndList
 %type <myOperand> SimpleExp
@@ -55,6 +66,7 @@
 %type <myTables> Tables
 %type <myBoolOperand> Literal
 %type <myNames> Atts
+%type <myAttTypes> AttTypeList
 
 %start SQL
 
@@ -79,8 +91,56 @@ SQL: SELECT SelectAtts FROM Tables WHERE AndList
 	tables = $4;
 	predicate = $6;	
 	groupingAtts = $9;
+}
+
+| CREATE TABLE YY_NAME '(' AttTypeList ')'
+{
+
+	table = $3;
+	attTypes = $5;
+
+}
+
+| DROP TABLE YY_NAME
+{
+
+	table = $3;
+
+}
+
+| LOAD DATA YY_NAME FROM YY_STRING
+{
+
+	table = $3;
+	fileLoc = $5;
+
+}
+| YY_NAME
+{
+
+	toggle = $1;
+
 };
 
+AttTypeList: YY_NAME YY_NAME
+{
+
+	$$ = (struct AttTypeList*) malloc (sizeof(struct AttTypeList));
+	$$->name = $1;
+	$$->type = $2;
+	$$->next = NULL;
+
+}
+
+| AttTypeList ',' YY_NAME YY_NAME
+{
+
+	$$ = (struct AttTypeList*) malloc (sizeof(struct AttTypeList));
+	$$->name = $3;
+	$$->type = $4;
+	$$->next = $1;
+
+};
 
 SelectAtts: Function ',' Atts 
 {

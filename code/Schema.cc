@@ -147,7 +147,7 @@ int Schema::Project(vector<int>& _attsToKeep) {
 	}
 
 	copy.clear();
-	cout << "Project good" << endl;
+	//cout << "Project good" << endl;
 	return 0;
 }
 

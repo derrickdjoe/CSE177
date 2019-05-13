@@ -56,7 +56,12 @@ extern int yydebug;
     FROM = 266,
     WHERE = 267,
     SUM = 268,
-    AND = 269
+    AND = 269,
+    CREATE = 270,
+    TABLE = 271,
+    DROP = 272,
+    LOAD = 273,
+    DATA = 274
   };
 #endif
 /* Tokens.  */
@@ -72,13 +77,18 @@ extern int yydebug;
 #define WHERE 267
 #define SUM 268
 #define AND 269
+#define CREATE 270
+#define TABLE 271
+#define DROP 272
+#define LOAD 273
+#define DATA 274
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 23 "QueryParser.y" /* yacc.c:1909  */
+#line 28 "QueryParser.y" /* yacc.c:1909  */
 
  	struct FuncOperand* myOperand;
 	struct FuncOperator* myOperator; 
@@ -87,10 +97,11 @@ union YYSTYPE
 	struct Operand* myBoolOperand;
 	struct AndList* myAndList;
 	struct NameList* myNames;
+	struct AttTypeList* myAttTypes;
 	char* actualChars;
 	char whichOne;
 
-#line 94 "QueryParser.h" /* yacc.c:1909  */
+#line 105 "QueryParser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
