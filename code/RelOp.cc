@@ -15,7 +15,7 @@ ostream& operator<<(ostream& _os, RelationalOp& _op) {
 
 Scan::Scan(Schema& _schema, DBFile& _file) : schema(_schema), file(_file) {
 
-	cout << "Built Scan" << endl;
+	//cout << "Built Scan" << endl;
 
 }
 
@@ -31,26 +31,31 @@ void Scan::ScanHelper(string tableN){
 
 bool Scan::GetNext(Record& _record){
 
-	if(file.GetNext(_record) == 0){
+	while(true){
 
-		//cout << "SCAN TRUE" << endl;
-		return true;
+		bool ret = file.GetNext(_record);
+		//returns 0 if true
 
-	}else{
+		if(!ret){
 
-		//cout << "SCAN FALSE" << endl;
-		return false;
+			return true;
+
+		}else{
+
+			return false;
+
+		}
 
 	}
-
 
 }
 
 ostream& Scan::print(ostream& _os) {
 
 	file.SetZero();
-	_os << "SCAN " << " ( " << "TABLE : [" << tableName << "] ) ";
+	_os << "SCAN " << "(" << "TABLE : [" << tableName << "])";
 	_os << endl;
+
 	return _os;
 }
 
@@ -155,7 +160,7 @@ bool Select::GetNext(Record& _record){
 
 ostream& Select::print(ostream& _os) {
 
-	_os << "SELECT " << "Schema : [";
+	_os << "SELECT " << "(Schema : [";
 	
 	vector<Attribute> attL = schema.GetAtts();
 	for(int i = 0; i < attL.size(); i++){
@@ -170,12 +175,12 @@ ostream& Select::print(ostream& _os) {
 
 	}
 
-	_os << "]" << endl;
-	_os << "	       " << "Predicate : [";
+	_os << ")]" << endl;
+	_os << "       " << "(Predicate : [";
 
 	for(int i = 0; i < predicate.numAnds; i++){
 
-		if(i > 0){
+		if(i != 0){
 
 			_os << " AND ";
 
@@ -264,7 +269,7 @@ ostream& Select::print(ostream& _os) {
 
 	}
 
-	_os << "]" << endl;
+	_os << "])" << endl;
 	_os << *producer;
 
 	return _os;
@@ -283,7 +288,7 @@ Project::~Project() {
 
 bool Project::GetNext(Record& _record){
 
-	cout << "AM PROJECT" << endl;
+	//cout << "AM PROJECT" << endl;
 
 	while(true){
 
@@ -306,23 +311,41 @@ bool Project::GetNext(Record& _record){
 
 ostream& Project::print(ostream& _os) {
 
-	_os << "PROJECT" << " ";
+	_os << "PROJECT (Schema Out : [";
 
 	vector<Attribute> attL = schemaOut.GetAtts();
 
-	for(auto it = attL.begin(); it != attL.end(); it++){
+	for(int i = 0; i < attL.size(); i++){
 
-		if(it != attL.begin()){
+		if(i != 0){
 
 			_os << ", ";
 
 		}
 
-		_os << it->name;
+		_os << attL[i].name;
 
 	}
-	
+
+	_os << "])";
 	_os << endl;
+
+	_os << "        (Schema In : [";
+	vector<Attribute> attL1 = schemaIn.GetAtts();
+
+	for(int i = 0; i < attL1.size(); i++){
+
+		if(i != 0){
+
+			_os << ", ";
+
+		}
+
+		_os << attL1[i].name;
+
+	}
+
+	_os << "])" << endl;
 	_os << *producer;
 	return _os;
 
@@ -332,7 +355,7 @@ ostream& Project::print(ostream& _os) {
 Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 	CNF& _predicate, RelationalOp* _left, RelationalOp* _right) : schemaLeft(_schemaLeft), schemaRight(_schemaRight), schemaOut(_schemaOut), predicate(_predicate), left(_left), right(_right){
 
-	cout << "BUILT JOIN" << endl;
+	//cout << "BUILT JOIN" << endl;
 	isFirst = true;
 	hotPotato = true;
 	leftDone = false;
@@ -346,11 +369,11 @@ Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 
 	if (predicate.GetSortOrders(orderLeft, orderRight) == 0){
 
-		cout << "Ordermaker Failed" << endl;
+		//cout << "Ordermaker Failed" << endl;
 
 	}
 
-	cout << "Ordermaker worked" << endl;
+	//cout << "Ordermaker worked" << endl;
 
 }
 
@@ -366,9 +389,9 @@ bool Join::GetNext(Record& _record){
 
 	if(comp.op == GreaterThan || comp.op == LessThan){
 
-		cout << "Using NLJ" << endl;
+		//cout << "Using NLJ" << endl;
 
-		if(!NLJ(_record)){
+		if(!HJ(_record)){
 
 			return false;
 
@@ -380,7 +403,7 @@ bool Join::GetNext(Record& _record){
 
 	if(comp.op == Equals){
 
-		cout << "Using HJ" << endl;
+		//cout << "Using HJ" << endl;
 
 		if(!HJ(_record)){
 
@@ -394,7 +417,7 @@ bool Join::GetNext(Record& _record){
 
 	if(comp.op == Equals && isBig){
 	
-		cout << "Using SHJ" << endl;
+		//cout << "Using SHJ" << endl;
 		
 		if(!SHJ(_record)){
 
@@ -426,48 +449,6 @@ bool Join::NLJ(Record& _record){
 			recList.Insert(tempRec);
 
 		}
-
-		/*for(int i = 0; i < predicate.numAnds; i++){
-
-			Comparison comp = predicate.andList[i];
-
-			if(comp.operand1 == Left){
-
-				cout << schemaLeft.GetAtts()[comp.whichAtt1].name;
-	
-			}else if(comp.operand1 == Right){
-
-				cout << schemaRight.GetAtts()[comp.whichAtt1].name;
-
-			}
-
-			if(comp.op == Equals){
-
-				cout << " = ";
-
-			}else if(comp.op == GreaterThan){
-
-				cout << " > ";
-
-			}else if(comp.op == LessThan){
-
-				cout << " < ";
-
-			}
-
-			if(comp.operand2 == Left){
-
-				cout << schemaLeft.GetAtts()[comp.whichAtt2].name;
-
-			}else if(comp.operand2 == Right){
-
-				cout << schemaRight.GetAtts()[comp.whichAtt2].name;
-
-			}
-
-			cout << endl;
-
-		}*/
 
 		isFirst = false;
 
@@ -521,7 +502,7 @@ bool Join::NLJ(Record& _record){
 
 	}
 
-	cout << "DONE JOIN" << endl;
+	//cout << "DONE JOIN" << endl;
 	cout << endl;
 	
 
@@ -560,19 +541,19 @@ bool Join::HJ(Record& _record){
 	Record newRec;
 	int count = 0;
 
-	cout << hashRecList.Length() << " LENGTH" << endl;
+	//cout << hashRecList.Length() << " LENGTH" << endl;
 
 	while(true){
 		
 		if(hashRecList.AtEnd()){
 
-			cout << "Breaking" << endl;
+			//cout << "Breaking" << endl;
 			break;
 
 		}
 
-		cout << "HERE" << endl;
-		cout << "IN REC LIST" << count << endl;
+		//cout << "HERE" << endl;
+		//cout << "IN REC LIST" << count << endl;
 		
 		Record recToSend;
 		recToSend = hashRecList.Current();
@@ -598,7 +579,7 @@ bool Join::HJ(Record& _record){
 
 		//}
 
-		cout << "AM HERE" << endl;
+		//cout << "AM HERE" << endl;
 		recHash.MoveToStart();
 		int counter = 0;
 
@@ -616,9 +597,13 @@ bool Join::HJ(Record& _record){
 
 			if(predicate.Run(tempRec, tempHash)){
 
-				cout << "FOUND MATCH" << endl;
+				//cout << "FOUND MATCH" << endl;
 				counter++;
 				newRec.AppendRecords(tempRec, tempHash, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
+
+				//newRec.print(cout, schemaOut);
+				//cout << endl;
+
 				hashRecList.Insert(newRec);
 
 			}
@@ -629,15 +614,15 @@ bool Join::HJ(Record& _record){
 
 		if(!hashRecList.AtEnd()){
 
-			cout << "Stuck here" << endl;
+			//cout << "Stuck here" << endl;
 			hashRecList.MoveToStart();
 			Record recToSend;
 			recToSend = hashRecList.Current();
 			_record = recToSend;
 			hashRecList.Remove(recToSend);
-			cout << "SENT FIRST IN LIST" << endl;
-			cout << "COUNTER IS " << counter << endl;
-			cout << hashRecList.Length() << endl;
+			//cout << "SENT FIRST IN LIST" << endl;
+			//cout << "COUNTER IS " << counter << endl;
+			//cout << hashRecList.Length() << endl;
 			return true;
 
 		}
@@ -679,7 +664,7 @@ bool Join::SHJ(Record& _record){
 
 				//hotPotato = false;
 				rightWorking = true;
-				cout << "Inserted Right" << endl;
+				//cout << "Inserted Right" << endl;
 
 
 				if(recHashLeft.Length() != 0){
@@ -703,7 +688,7 @@ bool Join::SHJ(Record& _record){
 
 							Record newRec;
 							newRec.AppendRecords(compLeft, compRec, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
-							cout << "FOUND DATA" << endl;
+							//cout << "FOUND DATA" << endl;
 							_record = newRec;
 							return true;
 
@@ -723,7 +708,7 @@ bool Join::SHJ(Record& _record){
 
 			if(!rightWorking){
 
-				cout << "Right Done" << endl;
+				//cout << "Right Done" << endl;
 				rightDone = true;
 
 			}
@@ -748,7 +733,7 @@ bool Join::SHJ(Record& _record){
 
 				//hotPotato = true;
 				leftWorking = true;
-				cout << "Inserted Left" << endl;
+				//cout << "Inserted Left" << endl;
 
 				if(recHashRight.Length() != 0){
 
@@ -768,7 +753,7 @@ bool Join::SHJ(Record& _record){
 
 						if(predicate.Run(compRec, compRight)){
 
-							cout << "FOUND DATA" << endl;
+							//cout << "FOUND DATA" << endl;
 							Record newRec;
 							newRec.AppendRecords(compRec, compRight, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
 							_record = newRec;
@@ -792,7 +777,7 @@ bool Join::SHJ(Record& _record){
 			//cout << "HERE???" << endl;
 			if(!leftWorking){
 
-				cout << "Left Done" << endl;
+				//cout << "Left Done" << endl;
 				leftDone = true;
 
 			}
@@ -871,16 +856,17 @@ bool Join::SHJ(Record& _record){
 }
 
 ostream& Join::print(ostream& _os) {
+
 	_os << "JOIN ";
 
 	vector<Attribute> attL = schemaLeft.GetAtts();
 	vector<Attribute> attL1 = schemaRight.GetAtts();
 	vector<Attribute> attL2 = schemaOut.GetAtts();
 	
-	_os << "	Schema Left : ";
+	_os << "(Schema Left : [";
 	for(int i = 0; i < attL.size(); i++){
 
-		if(i > 0){
+		if(i != 0){
 
 			_os << ", ";
 
@@ -890,11 +876,13 @@ ostream& Join::print(ostream& _os) {
 
 	}
 
+	_os << "])";
 	_os << endl;
-	_os << "		Schema Right : ";
+
+	_os << "     (Schema Right : [";
 	for(int i = 0; i < attL1.size(); i++){
 
-		if(i > 0){
+		if(i != 0){
 
 			_os << ", ";
 
@@ -904,11 +892,13 @@ ostream& Join::print(ostream& _os) {
 
 	}
 
+	_os << "])";
 	_os << endl;
-	_os << "		Schema Out : ";
+
+	_os << "     (Schema Out : [";
 	for(int i = 0; i < attL2.size(); i++){
 
-		if(i > 0){
+		if(i != 0){
 
 			_os << ", ";
 		
@@ -918,11 +908,13 @@ ostream& Join::print(ostream& _os) {
 
 	}
 
+	_os << "])";
 	_os << endl;
-	_os << "		Predicate : ";
+
+	_os << "     (Predicate : [";
 	for(int i = 0; i < predicate.numAnds; i++){
 
-		if(i > 0) {
+		if(i != 0) {
 
 			_os << " AND ";
 
@@ -966,10 +958,12 @@ ostream& Join::print(ostream& _os) {
 
 	}
 
+	_os << "])";
 	_os << endl;
 	_os << *right;
 	_os << *left;
 	_os << endl;
+
 	return _os;
 
 }
@@ -1017,22 +1011,23 @@ bool DuplicateRemoval::GetNext(Record& _record) {
 
 ostream& DuplicateRemoval::print(ostream& _os) {
 
-	_os << "DISTINCT ";
+	_os << "DISTINCT [";
 
 	vector<Attribute> attL = schema.GetAtts();
 
-	for(auto it = attL.begin(); it != attL.end(); it++){
+	for(int i = 0; i < attL.size(); i++){
 
-		if(it != attL.begin()){
+		if(i != 0){
 
 			_os << ", ";
 
 		}
 
-		_os << it->name;
+		_os << attL[i].name;
 
 	}
 	
+	_os << "]" << endl;
 	_os << *producer;
 
 	return _os;
@@ -1041,6 +1036,9 @@ ostream& DuplicateRemoval::print(ostream& _os) {
 
 Sum::Sum(Schema& _schemaIn, Schema& _schemaOut, Function& _compute,
 	RelationalOp* _producer) : schemaIn(_schemaIn), schemaOut(_schemaOut), compute(_compute), producer(_producer){
+
+	isDone = false;
+	runningSum = 0;
 
 }
 
@@ -1051,30 +1049,26 @@ Sum::~Sum() {
 bool Sum::GetNext(Record& _record){
 
 	Type typeHolder;
-	double runningSum;
-	bool isDone = false;
+
+	if(!isDone){
 	
-	Record tempRec;
-	while(producer->GetNext(tempRec)){
+		while(producer->GetNext(_record)){
 
-		int intHolder = 0;
-		double dubsHolder = 0;
-		typeHolder = compute.Apply(tempRec, intHolder, dubsHolder);
-		runningSum += intHolder + dubsHolder;
-	
-		isDone = true;
+			int intHolder = 0;
+			double dubsHolder = 0;
+			typeHolder = compute.Apply(_record, intHolder, dubsHolder);
+			runningSum += intHolder + dubsHolder;
 
-	}
+		}
 
-	if(isDone){
-
-		int recSize;
+		/*int recSize;
 		if(typeHolder == Integer){
 
 			char* whatIWant = new char[sizeof(int)];
 
 			sprintf(whatIWant, "%d", (int)runningSum);
 			_record.Consume(whatIWant);
+			isDone = true;
 			return true;
 
 		}else{
@@ -1083,22 +1077,61 @@ bool Sum::GetNext(Record& _record){
 
 			snprintf(whatIWant, recSize, "%f", runningSum);
 			_record.Consume(whatIWant);
+			isDone = true;
+			return true;
+
+		}*/
+
+		int whereAmI = sizeof(int) + sizeof(int);
+
+		if(typeHolder == Integer){
+
+			char* whatIWant = new char[1];
+		
+			((int*)whatIWant)[0] = whereAmI + sizeof(int);
+			((int*)whatIWant)[1] = whereAmI;
+			*((int*)&whatIWant[whereAmI]) = (int)runningSum;
+
+			char* toCopy = new char[whereAmI + sizeof(int)];
+			memcpy(toCopy, whatIWant, whereAmI + sizeof(int));
+
+			_record.Consume(toCopy);
+			_record.addToVec(1);
+
+			isDone = true;
+			return true;
+
+		}
+
+		if(typeHolder == Float){
+
+			char* whatIWant = new char[1];
+		
+			((int*)whatIWant)[0] = whereAmI + sizeof(double);
+			((int*)whatIWant)[1] = whereAmI;
+			*((double*)&whatIWant[whereAmI]) = runningSum;
+
+			char* toCopy = new char[whereAmI + sizeof(double)];
+			memcpy(toCopy, whatIWant, whereAmI + sizeof(double));
+
+			_record.Consume(toCopy);
+			_record.addToVec(2);
+
+			isDone = true;
 			return true;
 
 		}
 
 
-	}else{
-
-		return false;
-
 	}
+
+	return false;
 
 }
 
 ostream& Sum::print(ostream& _os) {
 
-	_os << "SUM";
+	_os << "SUM (Schema Out : [";
 	vector<Attribute> attL = schemaOut.GetAtts();
 
 	for(int i = 0; i < attL.size(); i++){
@@ -1107,8 +1140,27 @@ ostream& Sum::print(ostream& _os) {
 
 	}
 
+	_os << "])";
+	_os << endl;
+
+	_os << "    (Schema In : [";
+	vector<Attribute> attL1 = schemaIn.GetAtts();
+
+	for(int i = 0; i < attL.size(); i++){
+
+		if(i != 0){
+
+			cout << ", ";
+
+		}
+
+		_os << attL1[i].name;
+
+	}
+
+	_os << "])" << endl;
 	_os << *producer;
-	
+
 	return _os;
 }
 
@@ -1126,31 +1178,27 @@ GroupBy::~GroupBy() {
 
 bool GroupBy::GetNext(Record& _record){
 
-	cout << "GROUP BY GET NEXT" << endl;
-
-	bool hasStuff = compute.HasStuff();
-
-	//cout << "STUFF TO GROUP BY" << endl;
+	//cout << "GROUP BY GET NEXT" << endl;
 
 	if(isFirst){
 
-		Record rec;
-
 		//cout << "DOING AGGEGRATE" << endl;
 
-		while(producer->GetNext(rec)) {
+		while(producer->GetNext(_record)) {
 
 			double runningSum = 0;
 			Schema tempSch = schemaOut;
 			vector<int> attL;
 			stringstream key;
 
+			bool hasStuff = compute.HasStuff();
+
 			if(hasStuff) {
 
 				int intHolder = 0;
 				double dubsHolder = 0;
 
-				compute.Apply(rec, intHolder, dubsHolder);
+				compute.Apply(_record, intHolder, dubsHolder);
 				runningSum = dubsHolder + intHolder;
 			
 
@@ -1164,9 +1212,12 @@ bool GroupBy::GetNext(Record& _record){
 
 			}
 
-			rec.Project(&groupingAtts.whichAtts[0], groupingAtts.numAtts, schemaIn.GetNumAtts());
+			_record.Project(&groupingAtts.whichAtts[0], groupingAtts.numAtts, schemaIn.GetNumAtts());
 
-			rec.print(key, tempSch);
+			//_record.print(cout, tempSch);
+			//cout << endl;
+
+			_record.print(key, tempSch);
 
 			/*if(groupListVec.size() == 0){
 
@@ -1218,12 +1269,12 @@ bool GroupBy::GetNext(Record& _record){
 			if(groupListMap.find(key.str()) == groupListMap.end()){
 
 				groupData tempHolder;
-				tempHolder.rec = rec;
+				tempHolder.rec = _record;
 				tempHolder.sum = runningSum;
 			
 				groupListMap[key.str()] = tempHolder;
 
-				cout << key.str() << " THIS IS KEY " << endl;
+				//cout << key.str() << " THIS IS KEY " << endl;
 
 			}else{
 
@@ -1238,9 +1289,15 @@ bool GroupBy::GetNext(Record& _record){
 
 	}
 
-	if(groupListIter != groupListMap.end()){
+	while(true){
 
-		Record recToCreate;
+		if(groupListIter == groupListMap.end()){
+
+			break;
+
+		}
+
+		bool hasStuff = compute.HasStuff();
 
 		if(hasStuff) {
 
@@ -1268,7 +1325,9 @@ bool GroupBy::GetNext(Record& _record){
 				//_record.addToVec(groupListVec[iter].sum);
 
 
-			}else{
+			}
+
+			if(holder == Float){
 
 				char* whatIWant = new char[1];
 
@@ -1290,37 +1349,32 @@ bool GroupBy::GetNext(Record& _record){
 
 			}
 
-			recToCreate.AppendRecords(runningSumRec, (*groupListIter).second.rec, 1, schemaOut.GetNumAtts() - 1);
+			_record.AppendRecords(runningSumRec, (*groupListIter).second.rec, 1, schemaOut.GetNumAtts() - 1);
 
-			//recToCreate.AppendRecords(runningSumRec, *groupListVec[iter].rec, 1, schemaOut.GetNumAtts() - 1);
+			//_record.AppendRecords(runningSumRec, *groupListVec[iter].rec, 1, schemaOut.GetNumAtts() - 1);
 
-
-		}else{
 
 		}
 
-		_record = recToCreate;
 		groupListIter++;
 		//iter++;
 
 		return true;
 
-	}else{
-
-		return false;
-
 	}
+
+	return false;
 
 }
 
 ostream& GroupBy::print(ostream& _os) {
 	
-	_os << "GROUP BY ";
+	_os << "GROUP BY (Schema Out : [";
 	vector<Attribute> attL = schemaOut.GetAtts();
 
 	for(int i = 0; i < attL.size(); i++){
 
-		if(i > 0){
+		if(i != 0){
 
 			_os << ", ";
 
@@ -1330,6 +1384,24 @@ ostream& GroupBy::print(ostream& _os) {
 
 	}
 
+	_os << "])" << endl;
+	
+	_os << "         (Schema In : [";
+	vector<Attribute> attL1 = schemaIn.GetAtts();
+
+	for(int i = 0; i < attL1.size(); i++){
+
+		if(i != 0){
+
+			_os << ", ";
+
+		}
+
+		_os << attL1[i].name;
+
+	}
+
+	_os << "])";
 	_os << *producer;
 
 	return _os;
@@ -1345,60 +1417,36 @@ WriteOut::WriteOut(Schema& _schema, string& _outFile, RelationalOp* _producer) :
 
 WriteOut::~WriteOut() {
 
-	if (outFileStream.is_open()){
-
-		outFileStream.close();
-
-	}
-
 }
 
 bool WriteOut::GetNext(Record& _record){
 
-	cout << "TRYING TO GET NEXT RECORD FROM WRITEOUT" << endl;
+	//cout << "TRYING TO GET NEXT RECORD FROM WRITEOUT" << endl;
 	bool ret = producer->GetNext(_record);
 	if(!ret){
 
-		cout << "NOTHING NEXT" << endl;
+		//cout << "NOTHING NEXT" << endl;
 		return false;
 
 	}else{
 
-		cout << "TRYING TO PRINT STUFF" << endl;
+		//cout << "TRYING TO PRINT STUFF" << endl;
 		_record.print(outFileStream, schema);
 		outFileStream << endl;
 		return true;
 
 	}
 
-	/*cout << "PRINTING BOOL" << endl;
-	bool ret = producer->GetNext(_record);
-	cout << ret << endl;
-
-	if(producer->GetNext(_record)){
-
-		cout << "SEG FAULT" << endl;
-		_record.print(outFileStream, schema);
-		outFileStream << endl;
-		return true;
-
-	}else{
-
-		cout << "NOTHING NEXt" << endl;
-		outFileStream.close();
-		return false;
-
-	}*/
-
 }
 
 ostream& WriteOut::print(ostream& _os) {
+
 	_os << "OUTPUT" << " (Schema Out : [";
 
 	vector<Attribute> attL = schema.GetAtts();
 	for(int i = 0; i < attL.size(); i++){
 
-		if(i > 0){
+		if(i != 0){
 
 			_os << ", ";
 
@@ -1412,6 +1460,7 @@ ostream& WriteOut::print(ostream& _os) {
 
 	_os << endl;
 	_os << *producer;
+
 	return _os;
 }
 
@@ -1421,6 +1470,7 @@ ostream& operator<<(ostream& _os, QueryExecutionTree& _op) {
 	_os << "QUERY EXECUTION TREE";
 	_os << endl;
 	_os << *_op.root << endl;
+
 	return _os;
 
 }

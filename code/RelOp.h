@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <cstring>
-#include <unordered_map>
+#include <map>
 
 #include "Schema.h"
 #include "Record.h"
@@ -235,6 +235,9 @@ private:
 	// operator generating data
 	RelationalOp* producer;
 
+	bool isDone;
+	double runningSum;
+
 public:
 	Sum(Schema& _schemaIn, Schema& _schemaOut, Function& _compute,
 		RelationalOp* _producer);
@@ -267,8 +270,8 @@ private:
 	bool isFirst;
 	//int iter;
 	//vector<groupData> groupListVec;
-	unordered_map<string, groupData> groupListMap;
-	unordered_map<string, groupData>::iterator groupListIter;
+	map<string, groupData> groupListMap;
+	map<string, groupData>::iterator groupListIter;
 
 	// schema of records input to operator
 	Schema schemaIn;
@@ -342,18 +345,18 @@ public:
 
 		while(true){
 
-			cout << "STILL TRUE" << endl;
+			//cout << "STILL TRUE" << endl;
 			Record rec;
 			if(!root->GetNext(rec)){
 				
-				cout << "REC DONE" << endl;
+				//cout << "REC DONE" << endl;
 				break;
 
 			}
 
 		}
 
-		cout << "NOT TRUE" << endl;
+		//cout << "NOT TRUE" << endl;
 
 	}
 
