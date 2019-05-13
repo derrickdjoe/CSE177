@@ -165,13 +165,13 @@ ostream& Select::print(ostream& _os) {
 	vector<Attribute> attL = schema.GetAtts();
 	for(int i = 0; i < attL.size(); i++){
 
-		if (i > 0){
+		_os << attL[i].name;
+
+		if(i < attL.size() - 1){
 
 			_os << ", ";
 
 		}
-
-		_os << attL[i].name;
 
 	}
 
@@ -180,12 +180,6 @@ ostream& Select::print(ostream& _os) {
 
 	for(int i = 0; i < predicate.numAnds; i++){
 
-		if(i != 0){
-
-			_os << " AND ";
-
-		}
-		
 		vector<Attribute> attL = schema.GetAtts();
 		Comparison comp = predicate.andList[i];
 
@@ -266,6 +260,12 @@ ostream& Select::print(ostream& _os) {
 
 		}
 
+		if(i < predicate.numAnds - 1){
+
+			_os << " AND ";
+
+		}
+
 
 	}
 
@@ -317,13 +317,13 @@ ostream& Project::print(ostream& _os) {
 
 	for(int i = 0; i < attL.size(); i++){
 
-		if(i != 0){
+		_os << attL[i].name;
+
+		if(i < attL.size() - 1){
 
 			_os << ", ";
 
 		}
-
-		_os << attL[i].name;
 
 	}
 
@@ -335,13 +335,13 @@ ostream& Project::print(ostream& _os) {
 
 	for(int i = 0; i < attL1.size(); i++){
 
-		if(i != 0){
+		_os << attL1[i].name;
+
+		if(i < attL1.size() - 1){
 
 			_os << ", ";
 
 		}
-
-		_os << attL1[i].name;
 
 	}
 
@@ -866,13 +866,13 @@ ostream& Join::print(ostream& _os) {
 	_os << "(Schema Left : [";
 	for(int i = 0; i < attL.size(); i++){
 
-		if(i != 0){
+		_os << attL[i].name;
+
+		if(i < attL.size() - 1){
 
 			_os << ", ";
 
 		}
-
-		_os << attL[i].name;
 
 	}
 
@@ -882,13 +882,13 @@ ostream& Join::print(ostream& _os) {
 	_os << "     (Schema Right : [";
 	for(int i = 0; i < attL1.size(); i++){
 
-		if(i != 0){
+		_os << attL1[i].name;
+
+		if(i < attL1.size() - 1){
 
 			_os << ", ";
 
 		}
-
-		_os << attL1[i].name;
 
 	}
 
@@ -898,13 +898,13 @@ ostream& Join::print(ostream& _os) {
 	_os << "     (Schema Out : [";
 	for(int i = 0; i < attL2.size(); i++){
 
-		if(i != 0){
+		_os << attL2[i].name;
+
+		if(i < attL.size() - 1){
 
 			_os << ", ";
-		
-		}
 
-		_os << attL2[i].name;
+		}
 
 	}
 
@@ -913,12 +913,6 @@ ostream& Join::print(ostream& _os) {
 
 	_os << "     (Predicate : [";
 	for(int i = 0; i < predicate.numAnds; i++){
-
-		if(i != 0) {
-
-			_os << " AND ";
-
-		}
 
 		Comparison comp = predicate.andList[i];
 
@@ -953,6 +947,12 @@ ostream& Join::print(ostream& _os) {
 		}else if(comp.operand2 == Right){
 
 			_os << schemaRight.GetAtts()[comp.whichAtt2].name;
+
+		}
+
+		if(i < predicate.numAnds - 1){
+
+			_os << " AND ";
 
 		}
 
@@ -1017,13 +1017,13 @@ ostream& DuplicateRemoval::print(ostream& _os) {
 
 	for(int i = 0; i < attL.size(); i++){
 
-		if(i != 0){
+		_os << attL[i].name;
+
+		if(i < attL.size() - 1){
 
 			_os << ", ";
 
 		}
-
-		_os << attL[i].name;
 
 	}
 	
@@ -1057,7 +1057,8 @@ bool Sum::GetNext(Record& _record){
 			int intHolder = 0;
 			double dubsHolder = 0;
 			typeHolder = compute.Apply(_record, intHolder, dubsHolder);
-			runningSum += intHolder + dubsHolder;
+			runningSum += intHolder;
+			runningSum += dubsHolder;
 
 		}
 
@@ -1148,13 +1149,13 @@ ostream& Sum::print(ostream& _os) {
 
 	for(int i = 0; i < attL.size(); i++){
 
-		if(i != 0){
+		_os << attL1[i].name;
 
-			cout << ", ";
+		if(i < attL1.size() - 1){
+
+			_os << ", ";
 
 		}
-
-		_os << attL1[i].name;
 
 	}
 
@@ -1187,7 +1188,7 @@ bool GroupBy::GetNext(Record& _record){
 		while(producer->GetNext(_record)) {
 
 			double runningSum = 0;
-			Schema tempSch = schemaOut;
+			Schema sch = schemaOut;
 			vector<int> attL;
 			stringstream key;
 
@@ -1199,7 +1200,7 @@ bool GroupBy::GetNext(Record& _record){
 				double dubsHolder = 0;
 
 				compute.Apply(_record, intHolder, dubsHolder);
-				runningSum = dubsHolder + intHolder;
+				runningSum = intHolder + dubsHolder;
 			
 
 				for(int i = 1; i < schemaOut.GetNumAtts(); i++){
@@ -1208,7 +1209,7 @@ bool GroupBy::GetNext(Record& _record){
 
 				}
 
-				tempSch.Project(attL);
+				sch.Project(attL);
 
 			}
 
@@ -1217,7 +1218,7 @@ bool GroupBy::GetNext(Record& _record){
 			//_record.print(cout, tempSch);
 			//cout << endl;
 
-			_record.print(key, tempSch);
+			_record.print(key, sch);
 
 			/*if(groupListVec.size() == 0){
 
@@ -1374,13 +1375,13 @@ ostream& GroupBy::print(ostream& _os) {
 
 	for(int i = 0; i < attL.size(); i++){
 
-		if(i != 0){
+		_os << attL[i].name;
+
+		if(i < attL.size() - 1){
 
 			_os << ", ";
 
 		}
-
-		_os << attL[i].name;
 
 	}
 
@@ -1391,13 +1392,13 @@ ostream& GroupBy::print(ostream& _os) {
 
 	for(int i = 0; i < attL1.size(); i++){
 
-		if(i != 0){
+		_os << attL1[i].name;
+
+		if(1 < attL1.size() - 1){
 
 			_os << ", ";
 
 		}
-
-		_os << attL1[i].name;
 
 	}
 
@@ -1446,13 +1447,13 @@ ostream& WriteOut::print(ostream& _os) {
 	vector<Attribute> attL = schema.GetAtts();
 	for(int i = 0; i < attL.size(); i++){
 
-		if(i != 0){
+		_os << attL[i].name;
+
+		if(i < attL.size() - 1){
 
 			_os << ", ";
 
 		}
-
-		_os << attL[i].name;
 
 	}
 
