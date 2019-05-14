@@ -21,6 +21,7 @@
 	char* toggle;
 	char* fileLoc;
 	struct AttTypeList* attTypes;
+	struct DirectoryList* dList;
 %}
 
 
@@ -34,6 +35,7 @@
 	struct AndList* myAndList;
 	struct NameList* myNames;
 	struct AttTypeList* myAttTypes;
+	struct DirectoryList* myDList;
 	char* actualChars;
 	char whichOne;
 }
@@ -67,6 +69,7 @@
 %type <myBoolOperand> Literal
 %type <myNames> Atts
 %type <myAttTypes> AttTypeList
+%type <myDList> DirectoryList
 
 %start SQL
 
@@ -108,11 +111,12 @@ SQL: SELECT SelectAtts FROM Tables WHERE AndList
 
 }
 
-| LOAD DATA YY_NAME FROM YY_STRING
+| LOAD DATA YY_NAME FROM '/' DirectoryList '.' YY_NAME
 {
 
 	table = $3;
-	fileLoc = $5;
+	dList = $6;
+	fileLoc = $8;
 
 }
 | YY_NAME
@@ -138,6 +142,24 @@ AttTypeList: YY_NAME YY_NAME
 	$$ = (struct AttTypeList*) malloc (sizeof(struct AttTypeList));
 	$$->name = $3;
 	$$->type = $4;
+	$$->next = $1;
+
+};
+
+DirectoryList: YY_NAME
+{
+
+	$$ = (struct DirectoryList*) malloc (sizeof(struct DirectoryList));
+	$$->name = $1;
+	$$->next = NULL;
+
+}
+
+| DirectoryList '/' YY_NAME
+{
+
+	$$ = (struct DirectoryList*) malloc (sizeof(struct DirectoryList));
+	$$->name = $3;
 	$$->next = $1;
 
 };

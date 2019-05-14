@@ -134,11 +134,28 @@ int main(int argc, char* argv[]){
 
 	if(uInput == "1"){
 
+		cout << "Input name" << endl;
+		string input;
+		cin >> input;
+
+		string tableName = input;
+		string templateS = "/home/user/Documents/TPCH/";
+		string heapPath;
+		string textPath;
+
+		heapPath.append(templateS);
+		heapPath.append(input);
+		heapPath.append(".dat");
+		
+		textPath.append(templateS);
+		textPath.append(input);
+		textPath.append(".tbl");
+
 		//string tableName;
 		//string heapPath;
 		//string textPath;
-/*		
-		string tableName = "customer";
+		
+/*		string tableName = "customer";
 		string heapPath = "/home/user/Documents/TPCH/customer.dat";
 		string textPath = "/home/user/Documents/TPCH/customer.tbl";
 
@@ -157,11 +174,11 @@ int main(int argc, char* argv[]){
 		string tableName = "orders";
 		string heapPath = "/home/user/Documents/TPCH/orders.dat";
 		string textPath = "/home/user/Documents/TPCH/orders.tbl";
-*/		
+	
 		string tableName = "lineitem";
 		string heapPath = "/home/user/Documents/TPCH/lineitem.dat";
 		string textPath = "/home/user/Documents/TPCH/lineitem.tbl";
-/*		
+	
 		string tableName = "part";
 		string heapPath = "/home/user/Documents/TPCH/part.dat";
 		string textPath = "/home/user/Documents/TPCH/part.tbl";

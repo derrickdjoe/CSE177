@@ -88,7 +88,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 28 "QueryParser.y" /* yacc.c:1909  */
+#line 29 "QueryParser.y" /* yacc.c:1909  */
 
  	struct FuncOperand* myOperand;
 	struct FuncOperator* myOperator; 
@@ -98,10 +98,11 @@ union YYSTYPE
 	struct AndList* myAndList;
 	struct NameList* myNames;
 	struct AttTypeList* myAttTypes;
+	struct DirectoryList* myDList;
 	char* actualChars;
 	char whichOne;
 
-#line 105 "QueryParser.h" /* yacc.c:1909  */
+#line 106 "QueryParser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

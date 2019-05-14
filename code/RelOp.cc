@@ -1192,11 +1192,11 @@ ostream& Sum::print(ostream& _os) {
 }
 
 
-GroupBy::GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtts, Function& _compute, RelationalOp* _producer){
+GroupBy::GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtts, Function& _compute, RelationalOp* _producer) : groupingAtts(_groupingAtts){
 
 	schemaIn = _schemaIn;
 	schemaOut = _schemaOut;
-	groupingAtts = _groupingAtts;
+	//groupingAtts = _groupingAtts;
 	compute = _compute;
 	producer = _producer;
 
@@ -1244,7 +1244,7 @@ bool GroupBy::GetNext(Record& _record){
 
 			}
 
-			_record.Project(&groupingAtts.whichAtts[0], groupingAtts.numAtts, schemaIn.GetNumAtts());
+			_record.Project(groupingAtts.whichAtts, groupingAtts.numAtts, schemaIn.GetNumAtts());
 
 			//_record.print(cout, tempSch);
 			//cout << endl;
@@ -1433,7 +1433,7 @@ ostream& GroupBy::print(ostream& _os) {
 
 	}
 
-	_os << "])";
+	_os << "])" << endl;
 	_os << *producer;
 
 	return _os;

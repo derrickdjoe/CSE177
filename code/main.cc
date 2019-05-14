@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 
 #include "Catalog.h"
 #include "QueryOptimizer.h"
@@ -28,6 +29,7 @@ extern char* toggle;
 extern char* fileLoc;
 extern char* table;
 extern struct AttTypeList* attTypes;
+extern struct DirectoryList* dList;
 
 extern "C" int yyparse();
 extern "C" int yylex_destroy();
@@ -52,9 +54,9 @@ int main () {
 	// the query parser is accessed directly through yyparse
 	// this populates the extern data structures
 
-	//while (true){
+	while (true){
 
-		//cout << "Parsing" << endl;
+		cout << "Parsing" << endl;
 
 		int parse = -1;
 		if (yyparse () == 0) {
@@ -75,20 +77,32 @@ int main () {
 			if(table != NULL && attTypes != NULL){
 			
 				helper.createTable(table, attTypes);
+				catalog.Save();
 
-			}else if(table != NULL && fileLoc != NULL){
+			}else if(table != NULL && dList != NULL && fileLoc != NULL){
 
-				helper.loadData(table, fileLoc);
+				helper.loadData(table, dList, fileLoc);
+				catalog.Save();
 
 			}else if(table != NULL){
 
 				helper.dropTable(table);
+				catalog.Save();
 
 			}else if(toggle != NULL){
 
-				if(toggle == 0){
+				string toString = string(toggle);
 
+				if(toString == "Exit"){
+
+					cout << "Exiting" << endl;
+					catalog.Save();
 					return 0;
+
+				}else if(toString == "Schema"){
+	
+					//cout << "TOGGLE IS SHCMEA" << endl;
+					catalog.Print();
 
 				}
 
@@ -116,13 +130,24 @@ int main () {
 				//catalog.Print();
 
 				catalog.Save();
-				return 0;
 
 			}
 
 		}
 
-	//}
+		finalFunction = NULL;
+		tables = NULL;
+		predicate = NULL;
+		groupingAtts = NULL;
+		attsToSelect = NULL;
+		distinctAtts = 0;
+		toggle = NULL;
+		fileLoc = NULL;
+		table = NULL;
+		attTypes = NULL;
+		dList = NULL;
+		
+	}
 
 	return 0;
 }

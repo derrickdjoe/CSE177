@@ -73,4 +73,11 @@ struct AttTypeList {
 	struct AttTypeList* next;
 
 };
+
+struct DirectoryList {
+
+	char* name;
+	struct DirectoryList* next;
+
+};
 #endif

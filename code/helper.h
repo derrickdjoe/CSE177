@@ -28,7 +28,7 @@ class Helper {
 
 		void createTable(char* _table, AttTypeList* _attTL);
 		void dropTable(char* _table);
-		void loadData(char* _table, char* _fileLoc);
+		void loadData(char* _table, DirectoryList* _dList, char* _fileLoc);
 
 };
 
